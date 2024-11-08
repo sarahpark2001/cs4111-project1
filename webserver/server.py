@@ -41,7 +41,7 @@ DB_PASSWORD = "shp2156"
 
 DB_SERVER = "w4111.cisxo09blonu.us-east-1.rds.amazonaws.com"
 
-DATABASEURI = "postgresql://"+DB_USER+":"+DB_PASSWORD+"@"+DB_SERVER+"/shp2156"
+DATABASEURI = "postgresql://"+DB_USER+":"+DB_PASSWORD+"@"+DB_SERVER+"/proj1part2"
 
 
 #
@@ -51,8 +51,8 @@ engine = create_engine(DATABASEURI)
 
 
 # Here we create a test table and insert some values in it
-engine.execute("""DROP TABLE IF EXISTS test;""")
-engine.execute("""CREATE TABLE IF NOT EXISTS test (
+engine.execute("""DROP TABLE IF EXISTS shp2156.test;""")
+engine.execute("""CREATE TABLE IF NOT EXISTS shp2156.test (
   id serial,
   name text
 );""")
@@ -120,7 +120,7 @@ def index():
   #
   # example of a database query
   #
-  cursor = g.conn.execute("SELECT name FROM test")
+  cursor = g.conn.execute("SELECT name FROM shp2156.test")
   names = []
   for result in cursor:
     names.append(result['name'])  # can also be accessed using result[0]
@@ -179,7 +179,7 @@ def another():
 def add():
   name = request.form['name']
   print(name)
-  cmd = 'INSERT INTO test(name) VALUES (:name1), (:name2)';
+  cmd = 'INSERT INTO shp2156.test(name) VALUES (:name1), (:name2)';
   g.conn.execute(text(cmd), name1 = name, name2 = name);
   return redirect('/')
 
