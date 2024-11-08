@@ -51,8 +51,8 @@ engine = create_engine(DATABASEURI)
 
 
 # Here we create a test table and insert some values in it
-engine.execute("""DROP TABLE IF EXISTS test;""")
-engine.execute("""CREATE TABLE IF NOT EXISTS test (
+engine.execute("""DROP TABLE IF EXISTS public.test;""")
+engine.execute("""CREATE TABLE IF NOT EXISTS public.test (
   id serial,
   name text
 );""")
