@@ -51,8 +51,8 @@ engine = create_engine(DATABASEURI)
 
 
 # Here we create a test table and insert some values in it
-engine.execute("""DROP TABLE IF EXISTS shp2156.test;""")
-engine.execute("""CREATE TABLE IF NOT EXISTS shp2156.test (
+engine.execute("""DROP TABLE IF EXISTS ewu.test;""")
+engine.execute("""CREATE TABLE IF NOT EXISTS ewu.test (
   id serial,
   name text
 );""")
@@ -120,7 +120,7 @@ def index():
   #
   # example of a database query
   #
-  cursor = g.conn.execute("SELECT name FROM shp2156.test")
+  cursor = g.conn.execute("SELECT name FROM ewu.test")
   names = []
   for result in cursor:
     names.append(result['name'])  # can also be accessed using result[0]
@@ -179,7 +179,7 @@ def another():
 def add():
   name = request.form['name']
   print(name)
-  cmd = 'INSERT INTO shp2156.test(name) VALUES (:name1), (:name2)';
+  cmd = 'INSERT INTO ewu.test(name) VALUES (:name1), (:name2)';
   g.conn.execute(text(cmd), name1 = name, name2 = name);
   return redirect('/')
 
