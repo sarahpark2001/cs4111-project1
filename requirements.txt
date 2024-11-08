@@ -1,4 +1,5 @@
 Flask
 SQLAlchemy
 psycopg2-binary
-markupsafe  # or the version that works for you
+markupsafe
+itsdangerous
