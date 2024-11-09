@@ -25,17 +25,6 @@ tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 app = Flask(__name__, template_folder=tmpl_dir)
 app.secret_key = secrets.token_hex(16)
 
-
-# XXX: The Database URI should be in the format of: 
-#
-#     postgresql://USER:PASSWORD@<IP_OF_POSTGRE_SQL_SERVER>/<DB_NAME>
-#
-# For example, if you had username ewu2493, password foobar, then the following line would be:
-#
-#     DATABASEURI = "postgresql://ewu2493:foobar@<IP_OF_POSTGRE_SQL_SERVER>/postgres"
-#
-# For your convenience, we already set it to the class database
-
 # Use the DB credentials you received by e-mail
 DB_USER = "shp2156"
 DB_PASSWORD = "shp2156"
@@ -44,13 +33,9 @@ DB_SERVER = "w4111.cisxo09blonu.us-east-1.rds.amazonaws.com"
 
 DATABASEURI = "postgresql://"+DB_USER+":"+DB_PASSWORD+"@"+DB_SERVER+"/w4111"
 
-
-#
-# This line creates a database engine that knows how to connect to the URI above
-#
 engine = create_engine(DATABASEURI)
 
-
+'''
 # Here we create a test table and insert some values in it
 engine.execute("""DROP TABLE IF EXISTS shp2156.test;""")
 engine.execute("""CREATE TABLE IF NOT EXISTS shp2156.test (
@@ -58,7 +43,7 @@ engine.execute("""CREATE TABLE IF NOT EXISTS shp2156.test (
   name text
 );""")
 engine.execute("""INSERT INTO test(name) VALUES ('grace hopper'), ('alan turing'), ('ada lovelace');""")
-
+'''
 
 
 @app.before_request
