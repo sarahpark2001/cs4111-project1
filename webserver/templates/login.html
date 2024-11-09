@@ -5,13 +5,19 @@
     <title>Login Page</title>
   </head>
   <body>
-    <form action="/form_login" method="post">
-      <h2></h2>User ID:<br>
-      <input type="text" name='userid'><br>
-      Last Name:<br>
-      <input name='last_name'><br><br>
+    <form action="/login" method="post">
+      <h2>Login</h2>
+      User ID:<br>
+      <input type="text" name="userid" required><br>
+      Password:<br>
+      <input type="password" name="password" required><br><br>
+      
+      <label><input type="radio" name="user_type" value="student" required> Student</label><br>
+      <label><input type="radio" name="user_type" value="staff" required> Staff</label><br><br>
+      
       <input type="submit" value="Login">
     </form>
-    <h1>{{info}}</h1>
+    <h1>{{ info }}</h1>
   </body>
 </html>
+
