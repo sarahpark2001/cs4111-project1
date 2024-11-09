@@ -106,19 +106,7 @@ def teardown_request(exception):
 def index():
    return render_template('login.html')
 
-
-# This is an example of a different path.  You can see it at
-# 
-#     localhost:8111/another
-#
-# notice that the functio name is another() rather than index()
-# the functions for each app.route needs to have different names
-#
-@app.route('/another')
-def another():
-  return render_template("anotherfile.html")
-
-
+'''
 # Example of adding new data to the database
 @app.route('/add', methods=['POST'])
 def add():
@@ -127,6 +115,7 @@ def add():
   cmd = 'INSERT INTO shp2156.test(name) VALUES (:name1), (:name2)';
   g.conn.execute(text(cmd), name1 = name, name2 = name);
   return redirect('/')
+'''
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -167,6 +156,18 @@ def login():
 
     return render_template('login.html')
 
+@app.route('/signup', methods=['POST'])
+def signup():
+    user_type = request.form.get('user_type')
+    
+    if user_type == 'student':
+        return redirect('/signup_student')
+    elif user_type == 'staff':
+        return redirect('/signup_staff')
+    else:
+        return render_template('login.html', info="Please select a valid user type for sign-up.")
+
+
 @app.route('/student_dashboard')
 def student_dashboard():
     return render_template('student_dashboard.html', name=session.get('user_id'))
@@ -174,6 +175,84 @@ def student_dashboard():
 @app.route('/staff_dashboard')
 def staff_dashboard():
     return render_template('staff_dashboard.html', name=session.get('user_id'))
+
+@app.route('/signup_student', methods=['GET', 'POST'])
+def signup_student():
+    if request.method == 'POST':
+        student_id = request.form['studentid']
+        name = request.form['name']
+        email = request.form['email']
+        password1 = request.form['password1']
+        password2 = request.form['password2']
+        school_name = request.form['school_name']
+        div_name = request.form['div_name']
+        dept_name = request.form['dept_name']
+        program_option = request.form['program_option']
+        year = request.form['year']
+
+        # Check if passwords match
+        if password1 != password2:
+            return render_template('signup_student.html', info="Passwords do not match.")
+
+        # Check if email already exists
+        cursor = g.conn.execute("SELECT * FROM shp2156.Student_Attends WHERE email = %s", (email,))
+        existing_user = cursor.fetchone()
+        cursor.close()
+        
+        if existing_user:
+            return render_template('signup_student.html', info="Email already exists.")
+
+        # Validate year input
+        if not (1 <= int(year) <= 5):
+            return render_template('signup_student.html', info="Year must be between 1 and 5.")
+
+        # Insert new student record
+        g.conn.execute(
+            "INSERT INTO shp2156.Student_Attends (student_id, name, email, password, school_name, div_name, dept_name, program_option, year) "
+            "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
+            (student_id, name, email, password1, school_name, div_name, dept_name, program_option, year)
+        )
+        
+        return redirect('/login')
+    
+    return render_template('signup_student.html')
+
+@app.route('/signup_staff', methods=['GET', 'POST'])
+def signup_staff():
+    if request.method == 'POST':
+        staff_id = request.form['staffid']
+        name = request.form['name']
+        email = request.form['email']
+        password1 = request.form['password1']
+        password2 = request.form['password2']
+        phone_number = request.form['phone_number']
+        pay_grade = request.form['pay_grade']
+        component = request.form['component']
+        job_title = request.form['job_title']
+
+        # Check if passwords match
+        if password1 != password2:
+            return render_template('signup_staff.html', info="Passwords do not match.")
+
+        # Check if email already exists
+        cursor = g.conn.execute("SELECT * FROM shp2156.Staffs WHERE email = %s", (email,))
+        existing_user = cursor.fetchone()
+        cursor.close()
+        
+        if existing_user:
+            return render_template('signup_staff.html', info="Email already exists.")
+
+        # Insert new staff record
+        g.conn.execute(
+            "INSERT INTO shp2156.Staffs (staff_id, name, email, password, phone_number, pay_grade, component, job_title) "
+            "VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
+            (staff_id, name, email, password1, phone_number, pay_grade, component, job_title)
+        )
+        
+        return redirect('/login')
+    
+    return render_template('signup_staff.html')
+
 
 if __name__ == "__main__":
   import click
