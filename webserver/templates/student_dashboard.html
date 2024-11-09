@@ -3,9 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <title>Student Dashboard</title>
+    <style>
+        .button-container {
+            margin-bottom: 20px;
+        }
+        .button {
+            padding: 10px 20px;
+            margin-right: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            text-decoration: none;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .info-box {
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Welcome. You are a student.</h1>
+    <h1>
+        Welcome, 
+        {% if student.program_option == 'STA-21' %}
+            Officer Candidate {{ student.name }}
+        {% else %}
+            Midshipman {{ student.name }}
+        {% endif %}
+    </h1>
+
+    <div class="button-container">
+        <a href="/create_event" class="button">Create Event</a>
+        <a href="/directory" class="button">Directory</a>
+    </div>
+
+    <div class="info-box">
+        <h2>Your Participation Points</h2>
+        <p>Participation Points: {{ student.total_points }}</p>
+    </div>
 </body>
 </html>
-
