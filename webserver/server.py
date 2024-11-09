@@ -136,10 +136,9 @@ def login():
         user_type = request.form['user_type']  
         
         if user_type == 'student':
-            # Query the Student_Attends table for the student login
             cursor = g.conn.execute(
-                "SELECT name FROM shp2156.Student_Attends WHERE student_id = :user_id AND password = :password",
-                {'user_id': user_id, 'password': password}
+                "SELECT name FROM shp2156.Student_Attends WHERE student_id = %s AND password = %s",
+                (user_id, password)
             )
             user = cursor.fetchone()
             cursor.close()
@@ -153,8 +152,8 @@ def login():
         
         elif user_type == 'staff':
             cursor = g.conn.execute(
-                "SELECT name FROM shp2156.Staffs WHERE staff_id = :user_id AND password = :password",
-                {'user_id': user_id, 'password': password}
+                "SELECT name FROM shp2156.Staffs WHERE staff_id = %s AND password = %s",
+                (user_id, password)
             )
             user = cursor.fetchone()
             cursor.close()
@@ -167,7 +166,6 @@ def login():
                 return redirect('/staff_dashboard')
 
     return render_template('login.html')
-
 
 
 if __name__ == "__main__":
