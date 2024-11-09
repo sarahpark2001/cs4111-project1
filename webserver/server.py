@@ -187,24 +187,43 @@ def add():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        id1 = request.form['userid']
+        user_id = request.form['userid']
         password = request.form['password']
+        user_type = request.form['user_type']  
         
-        # Query the database for the user with matching student_id and password
-        cursor = g.conn.execute(
-            "SELECT name FROM shp2156.Student_Attends WHERE student_id = %s AND password = %s", 
-            (id1, password)
-        )
-        student = cursor.fetchone()
-        cursor.close()
+        if user_type == 'student':
+            # Query the Student_Attends table for the student login
+            cursor = g.conn.execute(
+                "SELECT name FROM shp2156.Student_Attends WHERE student_id = %s AND password = %s",
+                (user_id, password)
+            )
+            user = cursor.fetchone()
+            cursor.close()
 
-        if student is None:
-            return render_template('login.html', info='Invalid User ID or Password')
-        else:
-            session['user_id'] = id1  # Store user ID in session
-            return redirect('/dashboard')  # Redirect to the main page after login
+            if user is None:
+                return render_template('login.html', info='Invalid Student ID or Password')
+            else:
+                session['user_id'] = user_id
+                session['user_type'] = 'student'
+                return redirect('/student_dashboard')
+
+        elif user_type == 'staff':
+            cursor = g.conn.execute(
+                "SELECT name FROM shp2156.Staffs WHERE staff_id = %s AND password = %s",
+                (user_id, password)
+            )
+            user = cursor.fetchone()
+            cursor.close()
+
+            if user is None:
+                return render_template('login.html', info='Invalid Staff ID or Password')
+            else:
+                session['user_id'] = user_id
+                session['user_type'] = 'staff'
+                return redirect('/staff_dashboard')
 
     return render_template('login.html')
+
 
 
 if __name__ == "__main__":
