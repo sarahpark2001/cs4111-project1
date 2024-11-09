@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Sign Up Staff</title>
+  </head>
+  <body>
+    <form action="/signup_staff" method="post">
+      <h2>Sign Up</h2>
+      User ID (Numbers Only):<br>
+      <input type="number" name="userid" required><br>
+      Name (First and Last):<br>
+      <input type="text" name="name" required><br>
+      Email:<br>
+      <input type="email" name="email" required><br>
+      Password:<br>
+      <input type="password" name="password1" required><br><br>
+      Confirm Password:<br>
+      <input type="password" name="password2" required><br><br>
+      Confirm Password:<br>
+      <input type="password" name="password2" required><br><br>
+      Phone Number:<br>
+      <input type="tel" name="phone_number" required><br><br>
+      Pay Grade:<br>
+      <input type="text" name="pay_grade" required><br><br>
+      Component:<br>
+      <input type="text" name="component" required><br><br>
+      Job Title:<br>
+      <input type="text" name="job_title" required><br><br>
+      
+      <input type="submit" value="Sign Up As Staff">
+    </form>
+    <h1>{{ info }}</h1>
+  </body>
+</html>
+
