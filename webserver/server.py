@@ -152,10 +152,18 @@ def signup():
     else:
         return render_template('login.html', info="Please select a valid user type for sign-up.")
 
-
 @app.route('/student_dashboard')
 def student_dashboard():
-    return render_template('student_dashboard.html', name=session.get('user_id'))
+    if 'user_id' not in session or session.get('user_type') != 'student':
+        return redirect('/login')
+
+    student_id = session['user_id']
+    student = g.conn.execute(
+        "SELECT name, total_points, program_option FROM shp2156.Student_Attends WHERE student_id = %s",
+        (student_id,)
+    ).fetchone()
+
+    return render_template('student_dashboard.html', student=student)
 
 @app.route('/staff_dashboard')
 def staff_dashboard():
