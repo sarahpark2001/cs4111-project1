@@ -19,10 +19,11 @@ import os
 from sqlalchemy import *
 from sqlalchemy.pool import NullPool
 from flask import Flask, request, render_template, g, redirect, session, Response
+import secrets
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 app = Flask(__name__, template_folder=tmpl_dir)
-
+app.secret_key = secrets.token_hex(16)
 
 
 # XXX: The Database URI should be in the format of: 
@@ -127,7 +128,6 @@ def add():
   g.conn.execute(text(cmd), name1 = name, name2 = name);
   return redirect('/')
 
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -167,6 +167,13 @@ def login():
 
     return render_template('login.html')
 
+@app.route('/student_dashboard')
+def student_dashboard():
+    return render_template('student_dashboard.html', name=session.get('user_id'))
+
+@app.route('/staff_dashboard')
+def staff_dashboard():
+    return render_template('staff_dashboard.html', name=session.get('user_id'))
 
 if __name__ == "__main__":
   import click
