@@ -138,7 +138,7 @@ def login():
         if user_type == 'student':
             # Query the Student_Attends table for the student login
             cursor = g.conn.execute(
-                "SELECT name FROM shp2156.Student_Attends WHERE student_id = :user_id AND password = :password,
+                "SELECT name FROM shp2156.Student_Attends WHERE student_id = :user_id AND password = :password",
                 {'user_id': user_id, 'password': password}
             )
             user = cursor.fetchone()
