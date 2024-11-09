@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Sign Up Student</title>
+  </head>
+  <body>
+    <form action="/signup_student" method="post">
+      <h2>Sign Up</h2>
+      User ID (Numbers Only):<br>
+      <input type="number" name="studentid" required><br>
+      Name (First and Last):<br>
+      <input type="text" name="name" required><br>
+      Email:<br>
+      <input type="email" name="email" required><br>
+      Password:<br>
+      <input type="password" name="password1" required><br><br>
+      Confirm Password:<br>
+      <input type="password" name="password2" required><br><br>
+      School:<br>
+      <input type="text" name="school_name" required><br><br>
+      Division:<br>
+      <input type="text" name="div_name" required><br><br>
+      Department:<br>
+      <input type="text" name="dept_name" required><br><br>
+      Program Option:<br>
+      <input type="text" name="program_option" required><br><br>
+      Year (Between 1 and 5):<br>
+      <input type="number" name="year" required><br><br>
+      
+      <input type="submit" value="Sign Up As Student">
+    </form>
+    <h1>{{ info }}</h1>
+  </body>
+</html>
+
