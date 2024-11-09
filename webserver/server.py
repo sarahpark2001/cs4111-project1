@@ -178,8 +178,8 @@ def signup_student():
         password1 = request.form['password1']
         password2 = request.form['password2']
         school_name = request.form['school_name']
-        div_name = request.form['div_name']
         dept_name = request.form['dept_name']
+        div_name = request.form['div_name']
         program_option = request.form['program_option']
         year = request.form['year']
 
@@ -195,20 +195,27 @@ def signup_student():
         if existing_user:
             return render_template('signup_student.html', info="Email already exists.")
 
-        # Validate year input
-        if not (1 <= int(year) <= 5):
-            return render_template('signup_student.html', info="Year must be between 1 and 5.")
+        # Validate department and division pair
+        valid_divisions = {
+            'Administration': ['Public Affairs', 'Academics'],
+            'Logistics': ['Transportation', 'Finance'],
+            'Operations': ['Events', 'Training'],
+            'Supply': ['Wardroom', 'Outreach']
+        }
 
-        # Insert new student record
+        if dept_name not in valid_divisions or div_name not in valid_divisions[dept_name]:
+            return render_template('signup_student.html', info="Invalid division for the selected department.")
+
         g.conn.execute(
-            "INSERT INTO shp2156.Student_Attends (student_id, name, email, password, school_name, div_name, dept_name, program_option, year) "
+            "INSERT INTO shp2156.Student_Attends (student_id, name, email, password, school_name, dept_name, div_name, program_option, year) "
             "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
-            (student_id, name, email, password1, school_name, div_name, dept_name, program_option, year)
+            (student_id, name, email, password1, school_name, dept_name, div_name, program_option, year)
         )
         
         return redirect('/login')
     
     return render_template('signup_student.html')
+
 
 @app.route('/signup_staff', methods=['GET', 'POST'])
 def signup_staff():
