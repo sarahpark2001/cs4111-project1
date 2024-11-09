@@ -184,10 +184,27 @@ def add():
   return redirect('/')
 
 
-@app.route('/login')
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-    abort(401)
-    this_is_never_executed()
+    if request.method == 'POST':
+        id1 = request.form['userid']
+        password = request.form['password']
+        
+        # Query the database for the user with matching student_id and password
+        cursor = g.conn.execute(
+            "SELECT name FROM shp2156.Student_Attends WHERE student_id = %s AND password = %s", 
+            (id1, password)
+        )
+        student = cursor.fetchone()
+        cursor.close()
+
+        if student is None:
+            return render_template('login.html', info='Invalid User ID or Password')
+        else:
+            session['user_id'] = id1  # Store user ID in session
+            return redirect('/dashboard')  # Redirect to the main page after login
+
+    return render_template('login.html')
 
 
 if __name__ == "__main__":
