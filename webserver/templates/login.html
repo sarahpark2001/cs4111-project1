@@ -17,7 +17,12 @@
       
       <input type="submit" value="Login">
     </form>
+        <form action="/signup" method="post">
+          <h2>Sign Up</h2>
+          <label><input type="radio" name="user_type" value="student" required> Student</label><br>
+          <label><input type="radio" name="user_type" value="staff" required> Staff</label><br><br>
+        <input type="submit" value="Sign Up">
+    </form>
     <h1>{{ info }}</h1>
   </body>
 </html>
-
