@@ -124,6 +124,51 @@ def signup():
     else:
         return render_template('login.html', info="Please select a valid user type for sign-up.")
 
+@app.route('/rsvp', methods=['GET', 'POST'])
+def rsvp():
+    if 'user_id' not in session or session.get('user_type') != 'student':
+        return redirect('/login')
+
+    student_id = session['user_id']
+    
+    if request.method == 'POST':
+        rsvp_data = request.form.to_dict()
+        
+        for event_id, rsvp in rsvp_data.items():
+            event_id = int(event_id)
+            
+            cursor = g.conn.execute(
+                "SELECT 1 FROM shp2156.Participates WHERE event_id = %s AND student_id2 = %s", (event_id, student_id)
+            )
+            is_signed_up = cursor.fetchone() is not None
+            cursor.close()
+            
+            if rsvp == 'yes' and not is_signed_up:
+                g.conn.execute(
+                    "INSERT INTO shp2156.Participates (event_id, student_id2) VALUES (%s, %s)", (event_id, student_id)
+                )
+            elif rsvp == 'no' and is_signed_up:
+                g.conn.execute(
+                    "DELETE FROM shp2156.Participates WHERE event_id = %s AND student_id2 = %s", (event_id, student_id)
+                )
+         
+        return redirect('/student_dashboard')
+
+    events_query = """
+    SELECT e.event_id, e.event_date, e.event_start, e.max_capacity, 
+           (e.max_capacity - COALESCE(COUNT(p.student_id2), 0)) AS spots_remaining
+    FROM shp2156.Events_Created e
+    LEFT JOIN shp2156.Participates p ON e.event_id = p.event_id
+    WHERE e.event_date >= CURRENT_DATE
+    GROUP BY e.event_id, e.event_date, e.event_start, e.max_capacity
+    ORDER BY e.event_date, e.event_start;
+    """
+    
+    events = g.conn.execute(events_query).fetchall()
+    
+    return render_template('rsvp.html', events=events)
+
+
 @app.route('/student_dashboard')
 def student_dashboard():
     if 'user_id' not in session or session.get('user_type') != 'student':
