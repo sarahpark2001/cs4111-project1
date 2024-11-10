@@ -119,7 +119,6 @@ def directory():
     db_session.close()
 
     return render_template('directory.html', staff_data=staff_data, student_data=student_data)
-t_data)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
