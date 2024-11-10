@@ -10,10 +10,10 @@
             divisionSelect.innerHTML = '';
 
             const divisions = {
-                'Administration': ['Public Affairs', 'Academics'],
-                'Logistics': ['Transportation', 'Finance'],
-                'Operations': ['Events', 'Training'],
-                'Supply': ['Wardroom', 'Outreach']
+                'Administration Department': ['Public Affairs Division', 'Academics Division'],
+                'Logistics Department': ['Transportation Division', 'Finance Division'],
+                'Operations Department': ['Events Division', 'Training Division'],
+                'Supply Department': ['Wardroom Division', 'Outreach Division']
             };
 
             if (department in divisions) {
@@ -54,10 +54,10 @@
         Department:<br>
         <select name="dept_name" id="dept_name" required onchange="updateDivisionOptions()">
             <option value="">Select Department</option>
-            <option value="Administration">Administration</option>
-            <option value="Logistics">Logistics</option>
-            <option value="Operations">Operations</option>
-            <option value="Supply">Supply</option>
+            <option value="Administration Department">Administration</option>
+            <option value="Logistics Department">Logistics</option>
+            <option value="Operations Department">Operations</option>
+            <option value="Supply Department">Supply</option>
         </select><br><br>
 
         Division:<br>
