@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sign Up Student</title>
+    <script>
+        function updateDivisionOptions() {
+            const department = document.getElementById('dept_name').value;
+            const divisionSelect = document.getElementById('div_name');
+            divisionSelect.innerHTML = '';
+
+            const divisions = {
+                'Administration': ['Public Affairs', 'Academics'],
+                'Logistics': ['Transportation', 'Finance'],
+                'Operations': ['Events', 'Training'],
+                'Supply': ['Wardroom', 'Outreach']
+            };
+
+            if (department in divisions) {
+                divisions[department].forEach(function(division) {
+                    const option = document.createElement('option');
+                    option.value = division;
+                    option.textContent = division;
+                    divisionSelect.appendChild(option);
+                });
+            }
+        }
+    </script>
+</head>
+<body>
+    <form action="/signup_student" method="post">
+        <h2>Sign Up</h2>
+
+        Name (First and Last):<br>
+        <input type="text" name="name" required><br>
+
+        Email:<br>
+        <input type="email" name="email" required><br>
+
+        Password:<br>
+        <input type="password" name="password1" required><br><br>
+        Confirm Password:<br>
+        <input type="password" name="password2" required><br><br>
+
+        School:<br>
+        <select name="school_name" required>
+            <option value="Columbia">Columbia</option>
+            <option value="SUNY Maritime">SUNY Maritime</option>
+            <option value="Fordham - Lincoln Center">Fordham - Lincoln Center</option>
+            <option value="Fordham - Rose Hill">Fordham - Rose Hill</option>
+            <option value="Molloy">Molloy</option>
+        </select><br><br>
+
+        Department:<br>
+        <select name="dept_name" id="dept_name" required onchange="updateDivisionOptions()">
+            <option value="">Select Department</option>
+            <option value="Administration">Administration</option>
+            <option value="Logistics">Logistics</option>
+            <option value="Operations">Operations</option>
+            <option value="Supply">Supply</option>
+        </select><br><br>
+
+        Division:<br>
+        <select name="div_name" id="div_name" required>
+            <option value="">Select Division</option>
+        </select><br><br>
+
+        Program Option:<br>
+        <select name="program_option" required>
+            <option value="SSO">SSO</option>
+            <option value="NPP">NPP</option>
+            <option value="NAVY SCH">NAVY SCH</option>
+            <option value="M SCH">M SCH</option>
+            <option value="STA-21">STA-21</option>
+            <option value="CP-N">CP-N</option>
+        </select><br><br>
+
+        Year (Between 1 and 5):<br>
+        <select name="year" required>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+        </select><br><br>
+
+        <input type="submit" value="Sign Up As Student">
+    </form>
+    <h1>{{ info }}</h1>
+</body>
+</html>

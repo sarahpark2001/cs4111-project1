@@ -25,17 +25,6 @@ tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 app = Flask(__name__, template_folder=tmpl_dir)
 app.secret_key = secrets.token_hex(16)
 
-
-# XXX: The Database URI should be in the format of: 
-#
-#     postgresql://USER:PASSWORD@<IP_OF_POSTGRE_SQL_SERVER>/<DB_NAME>
-#
-# For example, if you had username ewu2493, password foobar, then the following line would be:
-#
-#     DATABASEURI = "postgresql://ewu2493:foobar@<IP_OF_POSTGRE_SQL_SERVER>/postgres"
-#
-# For your convenience, we already set it to the class database
-
 # Use the DB credentials you received by e-mail
 DB_USER = "shp2156"
 DB_PASSWORD = "shp2156"
@@ -44,22 +33,7 @@ DB_SERVER = "w4111.cisxo09blonu.us-east-1.rds.amazonaws.com"
 
 DATABASEURI = "postgresql://"+DB_USER+":"+DB_PASSWORD+"@"+DB_SERVER+"/w4111"
 
-
-#
-# This line creates a database engine that knows how to connect to the URI above
-#
 engine = create_engine(DATABASEURI)
-
-
-# Here we create a test table and insert some values in it
-engine.execute("""DROP TABLE IF EXISTS shp2156.test;""")
-engine.execute("""CREATE TABLE IF NOT EXISTS shp2156.test (
-  id serial,
-  name text
-);""")
-engine.execute("""INSERT INTO test(name) VALUES ('grace hopper'), ('alan turing'), ('ada lovelace');""")
-
-
 
 @app.before_request
 def before_request():
@@ -88,48 +62,15 @@ def teardown_request(exception):
   except Exception as e:
     pass
 
-
-#
-# @app.route is a decorator around index() that means:
-#   run index() whenever the user tries to access the "/" path using a GET request
-#
-# If you wanted the user to go to e.g., localhost:8111/foobar/ with POST or GET then you could use
-#
-#       @app.route("/foobar/", methods=["POST", "GET"])
-#
-# PROTIP: (the trailing / in the path is important)
-# 
-# see for routing: http://flask.pocoo.org/docs/0.10/quickstart/#routing
-# see for decorators: http://simeonfranklin.com/blog/2012/jul/1/python-decorators-in-12-steps/
-#
 @app.route('/')
 def index():
    return render_template('login.html')
 
-
-# This is an example of a different path.  You can see it at
-# 
-#     localhost:8111/another
-#
-# notice that the functio name is another() rather than index()
-# the functions for each app.route needs to have different names
-#
-@app.route('/another')
-def another():
-  return render_template("anotherfile.html")
-
-
-# Example of adding new data to the database
-@app.route('/add', methods=['POST'])
-def add():
-  name = request.form['name']
-  print(name)
-  cmd = 'INSERT INTO shp2156.test(name) VALUES (:name1), (:name2)';
-  g.conn.execute(text(cmd), name1 = name, name2 = name);
-  return redirect('/')
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+
+    info = request.args.get('info')
+    
     if request.method == 'POST':
         user_id = request.form['userid']
         password = request.form['password']
@@ -165,15 +106,136 @@ def login():
                 session['user_type'] = 'staff'
                 return redirect('/staff_dashboard')
 
-    return render_template('login.html')
+    return render_template('login.html', info=info)
+
+@app.route('/logout', methods=['POST'])
+def logout():
+    session.clear()  
+    return redirect('/login')
+
+@app.route('/signup', methods=['POST'])
+def signup():
+    user_type = request.form.get('user_type')
+    
+    if user_type == 'student':
+        return redirect('/signup_student')
+    elif user_type == 'staff':
+        return redirect('/signup_staff')
+    else:
+        return render_template('login.html', info="Please select a valid user type for sign-up.")
 
 @app.route('/student_dashboard')
 def student_dashboard():
-    return render_template('student_dashboard.html', name=session.get('user_id'))
+    if 'user_id' not in session or session.get('user_type') != 'student':
+        return redirect('/login')
+
+    student_id = session['user_id']
+    student = g.conn.execute(
+        "SELECT name, total_points, program_option FROM shp2156.Student_Attends WHERE student_id = %s",
+        (student_id,)
+    ).fetchone()
+
+    return render_template('student_dashboard.html', student=student)
 
 @app.route('/staff_dashboard')
 def staff_dashboard():
     return render_template('staff_dashboard.html', name=session.get('user_id'))
+
+@app.route('/signup_student', methods=['GET', 'POST'])
+def signup_student():
+    if request.method == 'POST':
+
+        #auto assign student_id to be 1+current max student_id
+        cursor = g.conn.execute("SELECT COALESCE(MAX(student_id), 0) + 1 FROM shp2156.Student_Attends")
+        student_id = cursor.fetchone()[0]
+        cursor.close()
+        
+        name = request.form['name']
+        email = request.form['email']
+        password1 = request.form['password1']
+        password2 = request.form['password2']
+        school_name = request.form['school_name']
+        dept_name = request.form['dept_name']
+        div_name = request.form['div_name']
+        program_option = request.form['program_option']
+        year = request.form['year']
+
+        # Check if passwords match
+        if password1 != password2:
+            return render_template('signup_student.html', info="Passwords do not match.")
+
+        # Check if email already exists
+        cursor = g.conn.execute("SELECT * FROM shp2156.Student_Attends WHERE email = %s", (email,))
+        existing_user = cursor.fetchone()
+        cursor.close()
+
+        if existing_user:
+            return render_template('signup_student.html', info="Email already exists.")
+
+        # Validate department and division pair
+        valid_divisions = {
+            'Administration': ['Public Affairs', 'Academics'],
+            'Logistics': ['Transportation', 'Finance'],
+            'Operations': ['Events', 'Training'],
+            'Supply': ['Wardroom', 'Outreach']
+        }
+
+        if dept_name not in valid_divisions or div_name not in valid_divisions[dept_name]:
+            return render_template('signup_student.html', info="Invalid division for the selected department.")
+
+        g.conn.execute(
+            "INSERT INTO shp2156.Student_Attends (student_id, name, email, password, school_name, dept_name, div_name, program_option, year) "
+            "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
+            (student_id, name, email, password1, school_name, dept_name, div_name, program_option, year)
+        )
+        info_message = f"You have been assigned User ID {student_id}. Please save your User ID and password for future logins."
+        return redirect(url_for('login', info=info_message))
+    
+    return render_template('signup_student.html')
+
+
+@app.route('/signup_staff', methods=['GET', 'POST'])
+def signup_staff():
+    if request.method == 'POST':
+        #assign staff_id to be current max staff_id + 1
+        cursor = g.conn.execute("SELECT COALESCE(MAX(staff_id), 0) + 1 FROM shp2156.Staffs")
+        staff_id = cursor.fetchone()[0]
+        cursor.close()
+        
+        name = request.form['name']
+        email = request.form['email']
+        password1 = request.form['password1']
+        password2 = request.form['password2']
+        phone_number = request.form['phone_number']
+        pay_grade = request.form['pay_grade']
+        component = request.form['component']
+        job_title = request.form['job_title']
+
+        # Check if passwords match
+        if password1 != password2:
+            return render_template('signup_staff.html', info="Passwords do not match.")
+
+        # Check if email already exists
+        cursor = g.conn.execute("SELECT * FROM shp2156.Staffs WHERE email = %s", (email,))
+        existing_user = cursor.fetchone()
+        cursor.close()
+        
+        if existing_user:
+            return render_template('signup_staff.html', info="Email already exists.")
+
+        # Insert new staff record
+        g.conn.execute(
+            "INSERT INTO shp2156.Staffs (staff_id, name, email, password, phone_number, pay_grade, component, job_title) "
+            "VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
+            (staff_id, name, email, password1, phone_number, pay_grade, component, job_title)
+        )
+        
+        # Redirect to login with info message
+        info_message = f"You have been assigned User ID {staff_id}. Please save your User ID and password for future logins."
+        return redirect(url_for('login', info=info_message))
+    
+    return render_template('signup_staff.html')
+
 
 if __name__ == "__main__":
   import click
