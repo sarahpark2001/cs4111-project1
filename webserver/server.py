@@ -293,10 +293,10 @@ def signup_student():
 
         # Validate department and division pair
         valid_divisions = {
-            'Administration': ['Public Affairs', 'Academics'],
-            'Logistics': ['Transportation', 'Finance'],
-            'Operations': ['Events', 'Training'],
-            'Supply': ['Wardroom', 'Outreach']
+            'Administration Department': ['Public Affairs Division', 'Academic Division'],
+            'Logistics Department': ['Transportation Division', 'Finance Division'],
+            'Operations Department': ['Events Division', 'Training Division'],
+            'Supply Department': ['Wardroom Division', 'Outreach Division']
         }
 
         if dept_name not in valid_divisions or div_name not in valid_divisions[dept_name]:
