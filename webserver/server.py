@@ -240,9 +240,9 @@ def student_dashboard():
 
 @app.route('/staff_dashboard')
 def staff_dashboard():
-    staff_id = session.get('staff_id')
+    staff_id = session.get('user_id')
     if not staff_id:
-        return redirect('/login') 
+        return redirect('/login')
 
     with engine.connect() as conn:
         result = conn.execute(
