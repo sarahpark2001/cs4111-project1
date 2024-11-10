@@ -304,7 +304,7 @@ def signup_student():
 
         g.conn.execute(
             "INSERT INTO shp2156.Student_Attends (student_id, email, name, program_option, total_points, year, school_name, password) "
-            "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
+            "VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
             (student_id, email, name, program_option, 0, year, school_name, password1)
         )
         g.conn.execute(
