@@ -87,14 +87,16 @@ def index():
 
 @app.route('/directory')
 def directory():
-    session = Session()
-    
-    staff_list = session.query(Staffs).all()
-    student_list = session.query(Student_Attends).all()
-    
+    if 'user_id' not in session:
+        return redirect('/login')  
+
+    db_session = SessionFactory()
+
+    staff_list = db_session.query(Staffs).all()
+    student_list = db_session.query(Student_Attends).all()
+
     staff_data = []
     for staff in staff_list:
-        # Adjust component for USNR to use USN ranks
         component_key = 'USN' if staff.component == 'USNR' else staff.component
         rank_title = ranks.get(component_key, {}).get(staff.pay_grade, '') if component_key != 'Civilian' else ''
         staff_data.append({
@@ -103,7 +105,7 @@ def directory():
             'phone_number': staff.phone_number,
             'email': staff.email
         })
-    
+
     student_data = []
     for student in student_list:
         title = 'OC' if student.program_option == 'STA-21' else 'MIDN'
@@ -113,10 +115,11 @@ def directory():
             'phone_number': student.phone_number,
             'email': student.email
         })
-    
-    session.close()
-    
+
+    db_session.close()
+
     return render_template('directory.html', staff_data=staff_data, student_data=student_data)
+t_data)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
