@@ -35,6 +35,25 @@ DATABASEURI = "postgresql://"+DB_USER+":"+DB_PASSWORD+"@"+DB_SERVER+"/w4111"
 
 engine = create_engine(DATABASEURI)
 
+# ranks dictionary to use for directory, etc.
+ranks = {
+    'USMC': {
+        'E-1': 'Private', 'E-2': 'Private First Class', 'E-3': 'Lance Corporal', 'E-4': 'Corporal',
+        'E-5': 'Sergeant', 'E-6': 'Staff Sergeant', 'E-7': 'Gunnery Sergeant', 'E-8': 'Master Sergeant',
+        'E-9': 'Master Gunnery Sergeant', 'O-1': 'Second Lieutenant', 'O-2': 'First Lieutenant', 'O-3': 'Captain',
+        'O-4': 'Major', 'O-5': 'Lieutenant Colonel', 'O-6': 'Colonel', 'O-7': 'Brigadier General',
+        'O-8': 'Major General', 'O-9': 'Lieutenant General', 'O-10': 'General'
+    },
+    'USN': {
+        'E-1': 'Seaman Recruit', 'E-2': 'Seaman Apprentice', 'E-3': 'Seaman',
+        'E-4': 'Petty Officer Third Class', 'E-5': 'Petty Officer Second Class', 'E-6': 'Petty Officer First Class',
+        'E-7': 'Chief Petty Officer', 'E-8': 'Senior Chief Petty Officer', 'E-9': 'Master Chief Petty Officer',
+        'O-1': 'Ensign', 'O-2': 'Lieutenant Junior Grade', 'O-3': 'Lieutenant', 'O-4': 'Lieutenant Commander',
+        'O-5': 'Commander', 'O-6': 'Captain', 'O-7': 'Rear Admiral (lower half)', 'O-8': 'Rear Admiral (upper half)',
+        'O-9': 'Vice Admiral', 'O-10': 'Admiral'
+    }
+}
+
 @app.before_request
 def before_request():
   """
@@ -65,6 +84,39 @@ def teardown_request(exception):
 @app.route('/')
 def index():
    return render_template('login.html')
+
+@app.route('/directory')
+def directory():
+    session = Session()
+    
+    staff_list = session.query(Staffs).all()
+    student_list = session.query(Student_Attends).all()
+    
+    staff_data = []
+    for staff in staff_list:
+        # Adjust component for USNR to use USN ranks
+        component_key = 'USN' if staff.component == 'USNR' else staff.component
+        rank_title = ranks.get(component_key, {}).get(staff.pay_grade, '') if component_key != 'Civilian' else ''
+        staff_data.append({
+            'title': rank_title,
+            'name': staff.name,
+            'phone_number': staff.phone_number,
+            'email': staff.email
+        })
+    
+    student_data = []
+    for student in student_list:
+        title = 'OC' if student.program_option == 'STA-21' else 'MIDN'
+        student_data.append({
+            'title': title,
+            'name': student.name,
+            'phone_number': student.phone_number,
+            'email': student.email
+        })
+    
+    session.close()
+    
+    return render_template('directory.html', staff_data=staff_data, student_data=student_data)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Directory</title>
+    <style>
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <h1>Directory</h1>
+
+    <h2>Staff</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Name</th>
+                <th>Phone Number</th>
+                <th>Email</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for staff in staff_data %}
+            <tr>
+                <td>{{ staff.title }}</td>
+                <td>{{ staff.name }}</td>
+                <td>{{ staff.phone_number }}</td>
+                <td>{{ staff.email }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>Students</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Name</th>
+                <th>Phone Number</th>
+                <th>Email</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in student_data %}
+            <tr>
+                <td>{{ student.title }}</td>
+                <td>{{ student.name }}</td>
+                <td>{{ student.phone_number }}</td>
+                <td>{{ student.email }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
