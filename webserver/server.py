@@ -124,6 +124,55 @@ def signup():
     else:
         return render_template('login.html', info="Please select a valid user type for sign-up.")
 
+@app.route('/rsvp', methods=['GET', 'POST'])
+def rsvp():
+    if 'user_id' not in session or session.get('user_type') != 'student':
+        return redirect('/login')
+    
+    student_id = session['user_id']
+    
+    events_query = """
+        SELECT ec.event_title, ec.event_date, ec.event_start, ec.max_capacity, 
+               (ec.max_capacity - COUNT(DISTINCT p.student_id2)) AS spots_remaining
+        FROM shp2156.Events_Created ec
+        LEFT JOIN shp2156.Participates p 
+        ON ec.event_id = p.event_id AND ec.event_title = p.event_title
+        GROUP BY ec.event_id, ec.event_title, ec.event_date, ec.event_start, ec.max_capacity
+        ORDER BY ec.event_date, ec.event_start;
+    """
+    
+    events = g.conn.execute(events_query).fetchall()
+
+    if request.method == 'POST':
+        for event in events:
+            event_title = event['event_title']
+            rsvp_status = request.form.get(f"rsvp_{event_title}")
+
+            if rsvp_status == 'yes':
+                # Add student to the event if not already signed up
+                g.conn.execute(
+                    """
+                    INSERT INTO shp2156.Participates (student_id, event_id, student_id2)
+                    VALUES (%s, %s, %s)
+                    ON CONFLICT (student_id, event_id, student_id2) DO NOTHING
+                    """,
+                    (student_id, event['event_id'], student_id)
+                )
+            elif rsvp_status == 'no':
+                # Remove student from the event if they cancel RSVP
+                g.conn.execute(
+                    """
+                    DELETE FROM shp2156.Participates 
+                    WHERE event_id = %s AND student_id2 = %s
+                    """,
+                    (event['event_id'], student_id)
+                )
+        return redirect('/student_dashboard')
+
+    return render_template('rsvp.html', events=events)
+
+
+
 @app.route('/student_dashboard')
 def student_dashboard():
     if 'user_id' not in session or session.get('user_type') != 'student':
