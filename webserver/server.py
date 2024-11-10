@@ -68,6 +68,9 @@ def index():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+
+    info = request.args.get('info')
+    
     if request.method == 'POST':
         user_id = request.form['userid']
         password = request.form['password']
@@ -103,7 +106,7 @@ def login():
                 session['user_type'] = 'staff'
                 return redirect('/staff_dashboard')
 
-    return render_template('login.html')
+    return render_template('login.html', info=info)
 
 @app.route('/signup', methods=['POST'])
 def signup():
@@ -222,7 +225,9 @@ def signup_staff():
             (staff_id, name, email, password1, phone_number, pay_grade, component, job_title)
         )
         
-        return redirect('/login')
+        # Redirect to login with info message
+        info_message = f"You have been assigned User ID {staff_id}. Please save your User ID and password for future logins."
+        return redirect(url_for('login', info=info_message))
     
     return render_template('signup_staff.html')
 
