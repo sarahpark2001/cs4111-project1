@@ -35,17 +35,6 @@ DATABASEURI = "postgresql://"+DB_USER+":"+DB_PASSWORD+"@"+DB_SERVER+"/w4111"
 
 engine = create_engine(DATABASEURI)
 
-'''
-# Here we create a test table and insert some values in it
-engine.execute("""DROP TABLE IF EXISTS shp2156.test;""")
-engine.execute("""CREATE TABLE IF NOT EXISTS shp2156.test (
-  id serial,
-  name text
-);""")
-engine.execute("""INSERT INTO test(name) VALUES ('grace hopper'), ('alan turing'), ('ada lovelace');""")
-'''
-
-
 @app.before_request
 def before_request():
   """
@@ -73,34 +62,9 @@ def teardown_request(exception):
   except Exception as e:
     pass
 
-
-#
-# @app.route is a decorator around index() that means:
-#   run index() whenever the user tries to access the "/" path using a GET request
-#
-# If you wanted the user to go to e.g., localhost:8111/foobar/ with POST or GET then you could use
-#
-#       @app.route("/foobar/", methods=["POST", "GET"])
-#
-# PROTIP: (the trailing / in the path is important)
-# 
-# see for routing: http://flask.pocoo.org/docs/0.10/quickstart/#routing
-# see for decorators: http://simeonfranklin.com/blog/2012/jul/1/python-decorators-in-12-steps/
-#
 @app.route('/')
 def index():
    return render_template('login.html')
-
-'''
-# Example of adding new data to the database
-@app.route('/add', methods=['POST'])
-def add():
-  name = request.form['name']
-  print(name)
-  cmd = 'INSERT INTO shp2156.test(name) VALUES (:name1), (:name2)';
-  g.conn.execute(text(cmd), name1 = name, name2 = name);
-  return redirect('/')
-'''
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -172,7 +136,12 @@ def staff_dashboard():
 @app.route('/signup_student', methods=['GET', 'POST'])
 def signup_student():
     if request.method == 'POST':
-        student_id = request.form['studentid']
+
+        #auto assign student_id to be 1+current max student_id
+        cursor = g.conn.execute("SELECT COALESCE(MAX(student_id), 0) + 1 FROM shp2156.Student_Attends")
+        student_id = cursor.fetchone()[0]
+        cursor.close()
+        
         name = request.form['name']
         email = request.form['email']
         password1 = request.form['password1']
@@ -191,7 +160,7 @@ def signup_student():
         cursor = g.conn.execute("SELECT * FROM shp2156.Student_Attends WHERE email = %s", (email,))
         existing_user = cursor.fetchone()
         cursor.close()
-        
+
         if existing_user:
             return render_template('signup_student.html', info="Email already exists.")
 
@@ -220,7 +189,11 @@ def signup_student():
 @app.route('/signup_staff', methods=['GET', 'POST'])
 def signup_staff():
     if request.method == 'POST':
-        staff_id = request.form['staffid']
+        #assign staff_id to be current max staff_id + 1
+        cursor = g.conn.execute("SELECT COALESCE(MAX(staff_id), 0) + 1 FROM shp2156.Staffs")
+        staff_id = cursor.fetchone()[0]
+        cursor.close()
+        
         name = request.form['name']
         email = request.form['email']
         password1 = request.form['password1']
