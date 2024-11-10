@@ -180,8 +180,8 @@ def signup_student():
             "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
             (student_id, name, email, password1, school_name, dept_name, div_name, program_option, year)
         )
-        
-        return redirect('/login')
+        info_message = f"You have been assigned User ID {student_id}. Please save your User ID and password for future logins."
+        return redirect(url_for('login', info=info_message))
     
     return render_template('signup_student.html')
 
