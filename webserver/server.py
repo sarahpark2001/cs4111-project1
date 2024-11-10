@@ -108,6 +108,11 @@ def login():
 
     return render_template('login.html', info=info)
 
+@app.route('/logout', methods=['POST'])
+def logout():
+    session.clear()  
+    return redirect('/login')
+
 @app.route('/signup', methods=['POST'])
 def signup():
     user_type = request.form.get('user_type')
