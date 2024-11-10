@@ -2,35 +2,26 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>RSVP</title>
+    <title>Event RSVP</title>
     <style>
         table {
             width: 100%;
             border-collapse: collapse;
         }
         th, td {
-            padding: 8px;
+            padding: 10px;
+            border: 1px solid #ddd;
             text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        .button {
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            text-decoration: none;
-            font-size: 16px;
-            cursor: pointer;
         }
     </style>
 </head>
 <body>
-    <h1>Event RSVP</h1>
+    <h1>RSVP for Events</h1>
     <form method="POST" action="/rsvp">
         <table>
             <thead>
                 <tr>
-                    <th>Event ID</th>
+                    <th>Event Title</th>
                     <th>Date</th>
                     <th>Start Time</th>
                     <th>Spots Remaining</th>
@@ -40,19 +31,19 @@
             <tbody>
                 {% for event in events %}
                 <tr>
-                    <td>{{ event.event_id }}</td>
+                    <td>{{ event.event_title }}</td>
                     <td>{{ event.event_date }}</td>
                     <td>{{ event.event_start }}</td>
                     <td>{{ event.spots_remaining }}</td>
                     <td>
-                        <label><input type="radio" name="rsvp_{{ event.event_id }}" value="yes"> Yes</label>
-                        <label><input type="radio" name="rsvp_{{ event.event_id }}" value="no"> No</label>
+                        <label><input type="radio" name="rsvp_{{ event.event_title }}" value="yes"> Yes</label>
+                        <label><input type="radio" name="rsvp_{{ event.event_title }}" value="no"> No</label>
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
-        <button type="submit" class="button">Submit RSVP</button>
+        <button type="submit">Submit RSVP</button>
     </form>
 </body>
 </html>
