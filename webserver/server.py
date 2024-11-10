@@ -240,7 +240,23 @@ def student_dashboard():
 
 @app.route('/staff_dashboard')
 def staff_dashboard():
-    return render_template('staff_dashboard.html', name=session.get('user_id'))
+    staff_id = session.get('staff_id')
+    if not staff_id:
+        return redirect('/login') 
+
+    with engine.connect() as conn:
+        result = conn.execute(
+            "SELECT name, component, pay_grade FROM Staffs WHERE staff_id = %s", (staff_id,)
+        ).fetchone()
+
+    if not result:
+        return "Staff member not found", 404
+
+    name, component, pay_grade = result['name'], result['component'], result['pay_grade']
+
+    title = ranks.get(component, {}).get(pay_grade, "Staff")
+
+    return render_template('staff_dashboard.html', title=title, name=name)
 
 @app.route('/signup_student', methods=['GET', 'POST'])
 def signup_student():
