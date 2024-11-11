@@ -406,8 +406,12 @@ def create_event():
         )
         
         # Redirect to login with info message
+        student = g.conn.execute(
+            "SELECT name, total_points, program_option FROM shp2156.Student_Attends WHERE student_id = %s",
+            (student_id,)
+        ).fetchone()
         info_message = f"Your {title} event has been sent to the staffs for approval!"
-        return redirect(url_for('student_dashboard', info=info_message))
+        return redirect(url_for('student_dashboard', student=student, info=info_message))
     
     return render_template('create_event.html')
 
