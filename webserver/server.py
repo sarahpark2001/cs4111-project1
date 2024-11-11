@@ -285,10 +285,11 @@ def staff_dashboard():
         return "Staff member not found", 404
 
     name, component, pay_grade = result['name'], result['component'], result['pay_grade']
-
     title = ranks.get(component, {}).get(pay_grade, "Staff")
+    message = request.args.get('info', None)
 
-    return render_template('staff_dashboard.html', title=title, name=name)
+    return render_template('staff_dashboard.html', title=title, name=name, info = message)
+
 
 @app.route('/signup_student', methods=['GET', 'POST'])
 def signup_student():
