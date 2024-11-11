@@ -253,8 +253,10 @@ def student_dashboard():
         "SELECT name, total_points, program_option FROM shp2156.Student_Attends WHERE student_id = %s",
         (student_id,)
     ).fetchone()
+    
+    message = request.args.get('info', None)
 
-    return render_template('student_dashboard.html', student=student)
+    return render_template('student_dashboard.html', student=student, info=message)
 
 @app.route('/staff_dashboard')
 def staff_dashboard():
