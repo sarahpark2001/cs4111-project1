@@ -299,12 +299,10 @@ def staff_dashboard():
 @app.route('/signup_student', methods=['GET', 'POST'])
 def signup_student():
     if request.method == 'POST':
-
-        #auto assign student_id to be 1+current max student_id
         cursor = g.conn.execute("SELECT COALESCE(MAX(student_id), 0) + 1 FROM shp2156.Student_Attends")
         student_id = cursor.fetchone()[0]
         cursor.close()
-        
+
         name = request.form['name']
         email = request.form['email']
         password1 = request.form['password1']
@@ -315,22 +313,18 @@ def signup_student():
         program_option = request.form['program_option']
         year = request.form['year']
 
-        # Check if name is valid
         if not name or not re.match(r"^[A-Za-z\s'-]{2,50}$", name):
             flash("Name must be 2-50 characters and contain only letters, spaces, apostrophes, or hyphens.", "error")
             return redirect(url_for('signup'))
 
-        # Email validation: basic email format check
         email_regex = r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)"
         if not email or not re.match(email_regex, email):
             flash("Please enter a valid email address.", "error")
             return redirect(url_for('signup'))
         
-        # Check if passwords match
         if password1 != password2:
             return render_template('signup_student.html', info="Passwords do not match.")
 
-        # Check if email already exists
         cursor = g.conn.execute("SELECT * FROM shp2156.Student_Attends WHERE email = %s", (email,))
         existing_user = cursor.fetchone()
         cursor.close()
@@ -338,15 +332,16 @@ def signup_student():
         if existing_user:
             return render_template('signup_student.html', info="Email already exists.")
 
-        # Validate department and division pair
-        valid_divisions = {
-            'Administration Department': ['Public Affairs Division', 'Academic Division'],
-            'Logistics Department': ['Transportation Division', 'Finance Division'],
-            'Operations Department': ['Events Division', 'Training Division'],
-            'Supply Department': ['Wardroom Division', 'Outreach Division']
-        }
+        cursor = g.conn.execute("SELECT div_name, dept_name FROM division_belongs")
+        divisions = cursor.fetchall()
 
-        if dept_name not in valid_divisions or div_name not in valid_divisions[dept_name]:
+        dept_divisions = {}
+        for division, department in divisions:
+            if department not in dept_divisions:
+                dept_divisions[department] = []
+            dept_divisions[department].append(division)
+
+        if dept_name not in dept_divisions or div_name not in dept_divisions[dept_name]:
             return render_template('signup_student.html', info="Invalid division for the selected department.")
 
         g.conn.execute(
@@ -362,7 +357,22 @@ def signup_student():
         info_message = f"You have been assigned User ID {student_id}. Please save your User ID and password for future logins."
         return redirect(url_for('login', info=info_message))
     
-    return render_template('signup_student.html')
+    cursor = g.conn.execute("SELECT school_name FROM schools")
+    schools = cursor.fetchall()
+
+    cursor = g.conn.execute("SELECT dept_name FROM departments")
+    departments = cursor.fetchall()
+
+    cursor = g.conn.execute("SELECT div_name, dept_name FROM division_belongs")
+    divisions = cursor.fetchall()
+
+    dept_divisions = {}
+    for division, department in divisions:
+        if department not in dept_divisions:
+            dept_divisions[department] = []
+        dept_divisions[department].append(division)
+
+    return render_template('signup_student.html', schools=schools, departments=departments, dept_divisions=dept_divisions)
 
 
 @app.route('/signup_staff', methods=['GET', 'POST'])
