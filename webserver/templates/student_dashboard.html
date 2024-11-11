@@ -23,6 +23,12 @@
     </style>
 </head>
 <body>
+    {% if info %}
+    <div class="alert-info">
+        {{ info }}
+    </div>
+    {% endif %}
+
     <h1>
         Welcome, 
         {% if student.program_option == 'STA-21' %}
