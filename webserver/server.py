@@ -90,35 +90,49 @@ def directory():
     if 'user_id' not in session:
         return redirect('/login')  
 
-    db_session = SessionFactory()
+    # db_session = SessionFactory()
 
-    staff_list = db_session.query(Staffs).all()
-    student_list = db_session.query(Student_Attends).all()
+    # staff_list = db_session.query(Staffs).all()
+    # student_list = db_session.query(Student_Attends).all()
 
-    staff_data = []
-    for staff in staff_list:
-        component_key = 'USN' if staff.component == 'USNR' else staff.component
-        rank_title = ranks.get(component_key, {}).get(staff.pay_grade, '') if component_key != 'Civilian' else ''
-        staff_data.append({
-            'title': rank_title,
-            'name': staff.name,
-            'phone_number': staff.phone_number,
-            'email': staff.email
-        })
+    # staff_data = []
+    # for staff in staff_list:
+    #     component_key = 'USN' if staff.component == 'USNR' else staff.component
+    #     rank_title = ranks.get(component_key, {}).get(staff.pay_grade, '') if component_key != 'Civilian' else ''
+    #     staff_data.append({
+    #         'title': rank_title,
+    #         'name': staff.name,
+    #         'phone_number': staff.phone_number,
+    #         'email': staff.email
+    #     })
 
-    student_data = []
-    for student in student_list:
-        title = 'OC' if student.program_option == 'STA-21' else 'MIDN'
-        student_data.append({
-            'title': title,
-            'name': student.name,
-            'phone_number': student.phone_number,
-            'email': student.email
-        })
+    # student_data = []
+    # for student in student_list:
+    #     title = 'OC' if student.program_option == 'STA-21' else 'MIDN'
+    #     student_data.append({
+    #         'title': title,
+    #         'name': student.name,
+    #         'phone_number': student.phone_number,
+    #         'email': student.email
+    #     })
 
-    db_session.close()
+    # db_session.close()
 
-    return render_template('directory.html', staff_data=staff_data, student_data=student_data)
+    # return render_template('directory.html', staff_data=staff_data, student_data=student_data)
+
+    staff_query = """
+        SELECT job_title, name, phone_number, email
+        FROM shp2156.Staffs
+    """
+    staff = g.conn.execute(staff_query).fetchall()
+
+    student_query = """
+        SELECT name, email, program_option, school_name, year
+        FROM shp2156.Student_Attends
+    """
+    student = g.conn.execute(student_query).fetchall()
+
+    return render_template('directory.html', staff_data=staff, student_data=student)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():

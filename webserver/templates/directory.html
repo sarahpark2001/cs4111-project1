@@ -38,19 +38,21 @@
     <table>
         <thead>
             <tr>
-                <th>Title</th>
                 <th>Name</th>
-                <th>Phone Number</th>
                 <th>Email</th>
+                <th>Program Option</th>
+                <th>School Name</th>
+                <th>Year</th>
             </tr>
         </thead>
         <tbody>
             {% for student in student_data %}
             <tr>
-                <td>{{ student.title }}</td>
                 <td>{{ student.name }}</td>
-                <td>{{ student.phone_number }}</td>
                 <td>{{ student.email }}</td>
+                <td>{{ student.program_option }}</td>
+                <td>{{ student.school_name }}</td>
+                <td>{{ student.year }}
             </tr>
             {% endfor %}
         </tbody>
