@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Create Event For Approval</title>
+  </head>
+  <body>
+    <form action="/create_event" method="post">
+      <h2>Sign Up</h2>
+      Title:<br>
+      <input type="text" name="event_title" required><br>
+      Location:<br>
+      <input type="text" name="event_location" required><br>
+      Date:<br>
+      <input type="date" name="event_date" required><br><br>
+      Start Time:<br>
+      <input type="time" name="event_start" required><br><br>
+      End Time:<br>
+      <input type="time" name="event_end" required><br><br>
+      Max Capacity:<br>
+      <input type="number" name="max_capacity" required><br><br>
+
+      Points:<br>
+      <select name="points" required>
+        <option value="" disabled selected>Select Number of Points</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+      </select><br><br>
+      
+      <input type="submit" value="Submit for Approval">
+    </form>
+    <h1>{{ info }}</h1>
+  </body>
+</html>
+
