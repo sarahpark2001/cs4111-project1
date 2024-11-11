@@ -20,6 +20,7 @@ from sqlalchemy import *
 from sqlalchemy.pool import NullPool
 from flask import Flask, request, render_template, g, redirect, session, Response, url_for
 import secrets
+import re
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 app = Flask(__name__, template_folder=tmpl_dir)
@@ -89,37 +90,7 @@ def index():
 def directory():
     if 'user_id' not in session:
         return redirect('/login')  
-
-    # db_session = SessionFactory()
-
-    # staff_list = db_session.query(Staffs).all()
-    # student_list = db_session.query(Student_Attends).all()
-
-    # staff_data = []
-    # for staff in staff_list:
-    #     component_key = 'USN' if staff.component == 'USNR' else staff.component
-    #     rank_title = ranks.get(component_key, {}).get(staff.pay_grade, '') if component_key != 'Civilian' else ''
-    #     staff_data.append({
-    #         'title': rank_title,
-    #         'name': staff.name,
-    #         'phone_number': staff.phone_number,
-    #         'email': staff.email
-    #     })
-
-    # student_data = []
-    # for student in student_list:
-    #     title = 'OC' if student.program_option == 'STA-21' else 'MIDN'
-    #     student_data.append({
-    #         'title': title,
-    #         'name': student.name,
-    #         'phone_number': student.phone_number,
-    #         'email': student.email
-    #     })
-
-    # db_session.close()
-
-    # return render_template('directory.html', staff_data=staff_data, student_data=student_data)
-
+        
     staff_query = """
         SELECT job_title, component, name, phone_number, email
         FROM shp2156.Staffs
@@ -288,7 +259,6 @@ def rsvp():
     return render_template('rsvp.html', events=events)
 
 
-
 @app.route('/student_dashboard')
 def student_dashboard():
     if 'user_id' not in session or session.get('user_type') != 'student':
@@ -303,6 +273,7 @@ def student_dashboard():
     message = request.args.get('info', None)
 
     return render_template('student_dashboard.html', student=student, info=message)
+
 
 @app.route('/staff_dashboard')
 def staff_dashboard():
@@ -344,6 +315,17 @@ def signup_student():
         program_option = request.form['program_option']
         year = request.form['year']
 
+        # Check if name is valid
+        if not name or not re.match(r"^[A-Za-z\s'-]{2,50}$", name):
+            flash("Name must be 2-50 characters and contain only letters, spaces, apostrophes, or hyphens.", "error")
+            return redirect(url_for('signup'))
+
+        # Email validation: basic email format check
+        email_regex = r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)"
+        if not email or not re.match(email_regex, email):
+            flash("Please enter a valid email address.", "error")
+            return redirect(url_for('signup'))
+        
         # Check if passwords match
         if password1 != password2:
             return render_template('signup_student.html', info="Passwords do not match.")
