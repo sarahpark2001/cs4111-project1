@@ -186,12 +186,12 @@ def rsvp():
     student_id = session['user_id']
     
     events_query = """
-        SELECT a.staff_id,ec.student_id, ec.event_title, ec.event_title, ec.event_date, ec.event_start, ec.max_capacity, 
+        SELECT a.event_id, a.staff_id,ec.student_id, ec.event_title, ec.event_date, ec.event_start, ec.max_capacity, 
                (ec.max_capacity - COUNT(DISTINCT p.student_id2)) AS spots_remaining
         FROM shp2156.approves a
         JOIN shp2156.events_created ec ON a.event_id = ec.event_id AND a.event_title = ec.event_title
         LEFT JOIN shp2156.Participates p ON ec.event_id = p.event_id AND ec.event_title = p.event_title
-        GROUP BY a.staff_id, ec.student_id, ec.event_id, ec.event_title, ec.event_date, ec.event_start, ec.max_capacity
+        GROUP BY a.event_id, a.staff_id, ec.student_id, ec.event_id, ec.event_title, ec.event_date, ec.event_start, ec.max_capacity
         ORDER BY ec.event_date, ec.event_start;
     """
     
@@ -200,7 +200,8 @@ def rsvp():
     if request.method == 'POST':
         for event in events:
             event_title = event['event_title']
-            rsvp_status = request.form.get(f"rsvp_{event_title}")
+            event_id = event['event_id']
+            rsvp_status = request.form.get(f"rsvp_{event_id}")
 
             if rsvp_status == 'yes':
                 # Add student to the event if not already signed up
