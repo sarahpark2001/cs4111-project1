@@ -5,6 +5,11 @@
     <title>Staff Dashboard</title>
 </head>
 <body>
+    {% if info %}
+    <div class="alert-info">
+        {{ info | safe }}
+    </div>
+    {% endif %}
     <h2>Welcome, {{ title }} {{ name }}!</h2>
     
     <button onclick="location.href='/directory'">View Directory</button><br><br>
