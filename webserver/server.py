@@ -199,7 +199,7 @@ def rsvp():
         return redirect('/login')
     
     student_id = session['user_id']
-
+    
     division_query = """
         SELECT div_name
         FROM shp2156.belongs
@@ -222,6 +222,7 @@ def rsvp():
     events = g.conn.execute(events_query, (division,)).fetchall()
 
     if request.method == 'POST':
+        message = ""
         for event in events:
             event_title = event['event_title']
             event_id = event['event_id']
@@ -237,6 +238,7 @@ def rsvp():
                     """,
                     (event['student_id'], event['event_id'], student_id, event['staff_id'], event_title)
                 )
+                message += f"You have RSVPed for '{event_title}' on {event_date}.<br>"
             elif rsvp_status == 'no':
                 # Remove student from the event if they cancel RSVP
                 g.conn.execute(
@@ -246,7 +248,8 @@ def rsvp():
                     """,
                     (event['event_id'], student_id)
                 )
-        # return redirect('/student_dashboard')
+                message += f"You have canceled your RSVP for '{event_title}' on {event_date}.<br>"
+        return redirect(url_for('student_dashboard', info=message))
 
     return render_template('rsvp.html', events=events)
 
