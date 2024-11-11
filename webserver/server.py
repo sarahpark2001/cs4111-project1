@@ -121,14 +121,15 @@ def directory():
     # return render_template('directory.html', staff_data=staff_data, student_data=student_data)
 
     staff_query = """
-        SELECT job_title, name, phone_number, email
+        SELECT job_title, component, name, phone_number, email
         FROM shp2156.Staffs
     """
     staff = g.conn.execute(staff_query).fetchall()
 
     student_query = """
-        SELECT name, email, program_option, school_name, year
-        FROM shp2156.Student_Attends
+        SELECT sa.name, sa.email, sa.program_option, sa.school_name, sa.year, b.dept_name, b.div_name
+        FROM shp2156.Student_Attends sa JOIN shp2156.belongs b
+        ON sa.student_id = b.student_id
     """
     student = g.conn.execute(student_query).fetchall()
 

@@ -17,6 +17,7 @@
         <thead>
             <tr>
                 <th>Title</th>
+                <th>Component</th>
                 <th>Name</th>
                 <th>Phone Number</th>
                 <th>Email</th>
@@ -26,6 +27,7 @@
             {% for staff in staff_data %}
             <tr>
                 <td>{{ staff.job_title }}</td>
+                <td>{{ staff.component }}</td>
                 <td>{{ staff.name }}</td>
                 <td>{{ staff.phone_number }}</td>
                 <td>{{ staff.email }}</td>
@@ -43,6 +45,8 @@
                 <th>Program Option</th>
                 <th>School Name</th>
                 <th>Year</th>
+                <th>Department</th>
+                <th>Division</th>
             </tr>
         </thead>
         <tbody>
@@ -52,7 +56,9 @@
                 <td>{{ student.email }}</td>
                 <td>{{ student.program_option }}</td>
                 <td>{{ student.school_name }}</td>
-                <td>{{ student.year }}
+                <td>{{ student.year }}</td>
+                <td>{{ student.dept_name }}</td>
+                <td>{{ student.div_name }}</td>
             </tr>
             {% endfor %}
         </tbody>
