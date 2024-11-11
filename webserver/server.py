@@ -437,25 +437,24 @@ def view_events():
     
     staff_id = session['user_id']
 
-    # Query to get events that have not been approved (i.e., not in the approves table)
+    # Query to get events that have not been approved
     events_query = """
         SELECT * FROM shp2156.events_created 
         WHERE event_id NOT IN (SELECT event_id FROM shp2156.approves);
     """
     events = g.conn.execute(events_query).fetchall()
 
-    # List to store event titles that were approved or rejected
+    # List to store event titles that were approved or rejected for confirmation message
     approved_events = []
     rejected_events = []
 
     if request.method == 'POST':
-        # Loop over the submitted form and check for actions
+        # Loop over the submitted form and check for changes
         for event in events:
             event_id = event['event_id']
             action = request.form.get(f'action_{event_id}')
             
             if action == 'approve':
-                # Insert approved event into the approves table
                 g.conn.execute(
                     """
                     INSERT INTO shp2156.approves (event_id, event_start, event_end, event_date, event_location, 
@@ -467,7 +466,6 @@ def view_events():
                     """, (staff_id, event_id)
                 )
                 
-                # Delete the event from events_created
                 g.conn.execute(
                     "DELETE FROM shp2156.events_created WHERE event_id = %s", (event_id,)
                 )
