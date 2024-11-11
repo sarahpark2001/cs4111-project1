@@ -432,41 +432,68 @@ def create_event():
 
 @app.route('/view_events', methods=['GET', 'POST'])
 def view_events():
+    if 'user_id' not in session or session.get('user_type') != 'staff':
+        return redirect('/login')
+    
+    staff_id = session['user_id']
+
+    # Query to get events that have not been approved (i.e., not in the approves table)
+    events_query = """
+        SELECT * FROM shp2156.events_created 
+        WHERE event_id NOT IN (SELECT event_id FROM shp2156.approves);
+    """
+    events = g.conn.execute(events_query).fetchall()
+
+    # List to store event titles that were approved or rejected
+    approved_events = []
+    rejected_events = []
+
     if request.method == 'POST':
-        if 'user_id' not in session or session.get('user_type') != 'student':
-            return redirect('/login')
-    
-        student_id = session['user_id']
+        # Loop over the submitted form and check for actions
+        for event in events:
+            event_id = event['event_id']
+            action = request.form.get(f'action_{event_id}')
+            
+            if action == 'approve':
+                # Insert approved event into the approves table
+                g.conn.execute(
+                    """
+                    INSERT INTO shp2156.approves (event_id, event_start, event_end, event_date, event_location, 
+                                                  event_points, max_capacity, student_id, event_title, staff_id)
+                    SELECT event_id, event_start, event_end, event_date, event_location, event_points, 
+                           max_capacity, student_id, event_title, %s
+                    FROM shp2156.events_created
+                    WHERE event_id = %s;
+                    """, (staff_id, event_id)
+                )
+                
+                # Delete the event from events_created
+                g.conn.execute(
+                    "DELETE FROM shp2156.events_created WHERE event_id = %s", (event_id,)
+                )
+                
+                approved_events.append(event['event_title'])  #to build message
 
-        #assign event_id to be current max event_id + 1
-        cursor = g.conn.execute("SELECT COALESCE(MAX(event_id), 0) + 1 FROM shp2156.events_created")
-        event_id = cursor.fetchone()[0]
-        cursor.close()
-        
-        title = request.form['event_title']
-        location = request.form['event_location']
-        date = request.form['event_date']
-        event_start = request.form['event_start']
-        event_end = request.form['event_end']
-        max_capacity = request.form['max_capacity']
-        points = request.form['points']
+            elif action == 'reject':
+                # Delete the event from events_created (rejected event)
+                g.conn.execute(
+                    "DELETE FROM shp2156.events_created WHERE event_id = %s", (event_id,)
+                )
+                
+                rejected_events.append(event['event_title'])  #to build message
 
-        # Insert new staff record
-        g.conn.execute(
-            "INSERT INTO shp2156.events_created (event_id, event_start, event_end, event_date, event_location, event_points, max_capacity, student_id, event_title) "
-            "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
-            (event_id, event_start, event_end, date, location, points, max_capacity, student_id, title)
-        )
-        
-        # Redirect to login with info message
-        student = g.conn.execute(
-            "SELECT name, total_points, program_option FROM shp2156.Student_Attends WHERE student_id = %s",
-            (student_id,)
-        ).fetchone()
-        info_message = f"Your {title} event has been sent to the staffs for approval!"
-        return redirect(url_for('student_dashboard', student=student, info=info_message))
-    
-    return render_template('create_event.html')
+
+        # Prepare the message to pass to the staff dashboard
+        info_message = ""
+        if approved_events:
+            info_message += "You approved the following events:\n" + "\n".join(approved_events) + "\n"
+        if rejected_events:
+            info_message += "You rejected the following events:\n" + "\n".join(rejected_events)
+
+        return redirect(url_for('staff_dashboard', info=info_message))
+
+    return render_template('view_events.html', events=events)
+
 
 
 if __name__ == "__main__":
