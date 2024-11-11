@@ -401,7 +401,7 @@ def create_event():
         # Insert new staff record
         g.conn.execute(
             "INSERT INTO shp2156.events_created (event_id, event_start, event_end, event_date, event_location, event_points, max_capacity, student_id, event_title) "
-            "VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
+            "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
             (event_id, event_start, event_end, date, location, points, max_capacity, student_id, title)
         )
         
