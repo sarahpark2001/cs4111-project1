@@ -518,6 +518,61 @@ def view_events():
 
     return render_template('view_events.html', events=events)
 
+@app.route('/invite', methods=['GET', 'POST'])
+def invite():
+    if 'user_id' not in session or session.get('user_type') != 'student':
+        return redirect('/login')
+    
+    student_id = session['user_id']
+
+    # Query to get events that have not been approved
+    events_query = """
+        SELECT * FROM shp2156.approves 
+        WHERE event_id NOT IN (SELECT event_id FROM shp2156.invites);
+    """
+    events = g.conn.execute(events_query).fetchall()
+
+    # List to store event titles that were sent invitations for confirmation message
+    invited_events = []
+
+    if request.method == 'POST':
+        # Loop over the submitted form and check for changes
+        for event in events:
+            event_id = event['event_id']
+            divisions = request.form.getlist(f"divisions_{event_id}")
+            
+            for division in divisions:
+                department_query = """
+                    SELECT dept_name
+                    FROM shp2156.belongs
+                    WHERE div_name = %s
+                """
+                department_result = g.conn.execute(department_query, (division,)).fetchone()
+                department = department_result['dept_name']
+
+                g.conn.execute(
+                    """
+                    INSERT INTO shp2156.invites (student_id, event_id, staff_id, div_name, dept_name, event_title)
+                    SELECT event_id, event_start, event_end, event_date, event_location, event_points, 
+                           max_capacity, student_id, event_title, staff_id, %s
+                    FROM shp2156.approves
+                    WHERE event_id = %s;
+                    """, 
+                    (student_id, event_id, event['staff_id'], division, department, event['event_title'])
+                )
+                
+                invited_events.append(event['event_title'])  #to build message
+
+        # Prepare the message to pass to the staff dashboard
+        info_message = ""
+        if invited_events:
+            info_message += "You sent invitations for the following events:\n" + "\n".join(invited_events) + "\n"
+
+
+        return redirect(url_for('student_dashboard', info=info_message))
+
+    return render_template('invite.html', events=events)
+
 
 
 if __name__ == "__main__":

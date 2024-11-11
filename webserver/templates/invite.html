@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Invite Divisions</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h1>Invite Divisions</h1>
+    <form method="POST" action="/invite">
+        <table>
+            <thead>
+                <tr>
+                    <th>Event Title</th>
+                    <th>Date</th>
+                    <th>Location</th>
+                    <th>Start Time</th>
+                    <th>End Time</th>
+                    <th>Max Capacity</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for event in events %}
+                <tr>
+                    <td>{{ event.event_title }}</td>
+                    <td>{{ event.event_date }}</td>
+                    <td>{{ event.event_location }}</td>
+                    <td>{{ event.event_start }}</td>
+                    <td>{{ event.event_end }}</td>
+                    <td>{{ event.max_capacity }}</td>
+                    <td>
+                        <label><input type="checkbox" name="invite_{{ event.event_id }}" value="finance"> Finance Division (Logistics Department)</label>
+                        <label><input type="checkbox" name="invite_{{ event.event_id }}" value="transportation"> Transportation Division (Logistics Department)</label>
+                        <label><input type="checkbox" name="invite_{{ event.event_id }}" value="public_affairs"> Public Affairs Division (Administration Department)</label>
+                        <label><input type="checkbox" name="invite_{{ event.event_id }}" value="academics"> Academics Division (Administration Department)</label>
+                        <label><input type="checkbox" name="invite_{{ event.event_id }}" value="events"> Events Division (Operations Department)</label>
+                        <label><input type="checkbox" name="invite_{{ event.event_id }}" value="training"> Training Division (Operations Department)</label>
+                        <label><input type="checkbox" name="invite_{{ event.event_id }}" value="wardroom"> Wardroom Division (Supply Department)</label>
+                        <label><input type="checkbox" name="invite_{{ event.event_id }}" value="outreach"> Outreach Division (Supply Department)</label>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <button type="submit">Send Invites</button>
+    </form>
+</body>
+</html>
