@@ -40,9 +40,9 @@
                     <td>{{ event.event_end }}</td>
                     <td>{{ event.max_capacity }}</td>
                     <td>
-                        <label><input type="radio" name="view_events_{{ event.event_id }}" value="approve"> Approve</label>
-                        <label><input type="radio" name="view_events_{{ event.event_id }}" value="reject"> Reject</label>
-                        <label><input type="radio" name="view_events_{{ event.event_id }}" value="pending" checked> Leave Pending</label>
+                        <label><input type="radio" name="action_{{ event.event_id }}" value="approve"> Approve</label>
+                        <label><input type="radio" name="action_{{ event.event_id }}" value="reject"> Reject</label>
+                        <label><input type="radio" name="action_{{ event.event_id }}" value="pending" checked> Leave Pending</label>
                     </td>
                 </tr>
                 {% endfor %}
