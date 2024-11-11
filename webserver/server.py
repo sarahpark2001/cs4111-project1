@@ -209,13 +209,13 @@ def rsvp():
     division = division_result['div_name']
     
     events_query = """
-        SELECT a.event_id, a.staff_id, ec.student_id, ec.event_title, ec.event_date, ec.event_start, ec.max_capacity, 
+        SELECT a.event_id, a.staff_id, ec.student_id, ec.event_title, ec.event_date, ec.event_start, ec.max_capacity, ec.event_points,
                (ec.max_capacity - COUNT(DISTINCT p.student_id2)) AS spots_remaining
         FROM shp2156.invites a
         JOIN shp2156.events_created ec ON a.event_id = ec.event_id AND a.event_title = ec.event_title
         LEFT JOIN shp2156.Participates p ON ec.event_id = p.event_id AND ec.event_title = p.event_title
         WHERE a.div_name = %s
-        GROUP BY a.event_id, a.staff_id, ec.student_id, ec.event_id, ec.event_title, ec.event_date, ec.event_start, ec.max_capacity
+        GROUP BY a.event_id, a.staff_id, ec.student_id, ec.event_id, ec.event_title, ec.event_date, ec.event_start, ec.max_capacity, ec.event_points
         ORDER BY ec.event_date, ec.event_start;
     """
     
@@ -226,6 +226,8 @@ def rsvp():
         for event in events:
             event_title = event['event_title']
             event_id = event['event_id']
+            event_points = event['event_points']
+            event_date = event['event_date']
             rsvp_status = request.form.get(f"rsvp_{event_id}")
 
             if rsvp_status == 'yes':
@@ -238,7 +240,19 @@ def rsvp():
                     """,
                     (event['student_id'], event['event_id'], student_id, event['staff_id'], event_title)
                 )
-                message += f"You have RSVPed for '{event_title}' on {event_date}.<br>"
+                
+                # Increase student points by event points on RSVP
+                g.conn.execute(
+                    """
+                    UPDATE shp2156.student_attends
+                    SET total_points = total_points + %s
+                    WHERE student_id = %s
+                    """,
+                    (event_points, student_id)
+                )
+                
+                message += f"You have RSVPed for '{event_title}' on {event_date}. You earned {event_points} points.<br>"
+
             elif rsvp_status == 'no':
                 # Remove student from the event if they cancel RSVP
                 g.conn.execute(
@@ -248,7 +262,27 @@ def rsvp():
                     """,
                     (event['event_id'], student_id)
                 )
-                message += f"You have canceled your RSVP for '{event_title}' on {event_date}.<br>"
+                
+                # Decrease student points by event points on cancel
+                g.conn.execute(
+                    """
+                    UPDATE shp2156.student_attends
+                    SET total_points = total_points - %s
+                    WHERE student_id = %s
+                    """,
+                    (event_points, student_id)
+                )
+
+                message += f"You have canceled your RSVP for '{event_title}' on {event_date}. You lost {event_points} points.<br>"
+
+        total_points_result = g.conn.execute(
+            "SELECT total_points FROM shp2156.student_attends WHERE student_id = %s",
+            (student_id,)
+        ).fetchone()
+        total_points = total_points_result['total_points']
+
+        message += f"You now have {total_points} points."
+
         return redirect(url_for('student_dashboard', info=message))
 
     return render_template('rsvp.html', events=events)
