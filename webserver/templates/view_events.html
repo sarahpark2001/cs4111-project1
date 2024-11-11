@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>View Events</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h1>View Events</h1>
+    <form method="POST" action="/view_events">
+        <table>
+            <thead>
+                <tr>
+                    <th>Event Title</th>
+                    <th>Date</th>
+                    <th>Location</th>
+                    <th>Start Time</th>
+                    <th>End Time</th>
+                    <th>Max Capacity</th>
+                    <th>Approval Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for event in events %}
+                <tr>
+                    <td>{{ event.event_title }}</td>
+                    <td>{{ event.event_date }}</td>
+                    <td>{{ event.event_location }}</td>
+                    <td>{{ event.event_start }}</td>
+                    <td>{{ event.event_end }}</td>
+                    <td>{{ event.max_capacity }}</td>
+                    <td>
+                        <label><input type="radio" name="view_events_{{ event.event_id }}" value="Approved"> Approved</label>
+                        <label><input type="radio" name="view_events_{{ event.event_id }}" value="Rejected"> Rejected</label>
+                        <label><input type="radio" name="view_events_{{ event.event_id }}" value="Pending"> Pending</label>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <button type="submit">Submit Approval</button>
+    </form>
+</body>
+</html>

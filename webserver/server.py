@@ -199,18 +199,27 @@ def rsvp():
         return redirect('/login')
     
     student_id = session['user_id']
+
+    division_query = """
+        SELECT div_name
+        FROM shp2156.belongs
+        WHERE student_id = %s
+    """
+    division_result = g.conn.execute(division_query, (student_id,)).fetchone()
+    division = division_result['div_name']
     
     events_query = """
-        SELECT a.event_id, a.staff_id,ec.student_id, ec.event_title, ec.event_date, ec.event_start, ec.max_capacity, 
+        SELECT a.event_id, a.staff_id, ec.student_id, ec.event_title, ec.event_date, ec.event_start, ec.max_capacity, 
                (ec.max_capacity - COUNT(DISTINCT p.student_id2)) AS spots_remaining
-        FROM shp2156.approves a
+        FROM shp2156.invites a
         JOIN shp2156.events_created ec ON a.event_id = ec.event_id AND a.event_title = ec.event_title
         LEFT JOIN shp2156.Participates p ON ec.event_id = p.event_id AND ec.event_title = p.event_title
+        WHERE a.div_name = %s
         GROUP BY a.event_id, a.staff_id, ec.student_id, ec.event_id, ec.event_title, ec.event_date, ec.event_start, ec.max_capacity
         ORDER BY ec.event_date, ec.event_start;
     """
     
-    events = g.conn.execute(events_query).fetchall()
+    events = g.conn.execute(events_query, (division,)).fetchall()
 
     if request.method == 'POST':
         for event in events:
@@ -416,6 +425,45 @@ def create_event():
         return redirect(url_for('student_dashboard', student=student, info=info_message))
     
     return render_template('create_event.html')
+
+@app.route('/view_events', methods=['GET', 'POST'])
+def view_events():
+    if request.method == 'POST':
+        if 'user_id' not in session or session.get('user_type') != 'student':
+            return redirect('/login')
+    
+        student_id = session['user_id']
+
+        #assign event_id to be current max event_id + 1
+        cursor = g.conn.execute("SELECT COALESCE(MAX(event_id), 0) + 1 FROM shp2156.events_created")
+        event_id = cursor.fetchone()[0]
+        cursor.close()
+        
+        title = request.form['event_title']
+        location = request.form['event_location']
+        date = request.form['event_date']
+        event_start = request.form['event_start']
+        event_end = request.form['event_end']
+        max_capacity = request.form['max_capacity']
+        points = request.form['points']
+
+        # Insert new staff record
+        g.conn.execute(
+            "INSERT INTO shp2156.events_created (event_id, event_start, event_end, event_date, event_location, event_points, max_capacity, student_id, event_title) "
+            "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
+            (event_id, event_start, event_end, date, location, points, max_capacity, student_id, title)
+        )
+        
+        # Redirect to login with info message
+        student = g.conn.execute(
+            "SELECT name, total_points, program_option FROM shp2156.Student_Attends WHERE student_id = %s",
+            (student_id,)
+        ).fetchone()
+        info_message = f"Your {title} event has been sent to the staffs for approval!"
+        return redirect(url_for('student_dashboard', student=student, info=info_message))
+    
+    return render_template('create_event.html')
+
 
 if __name__ == "__main__":
   import click
