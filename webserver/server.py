@@ -522,9 +522,10 @@ def invite():
         SELECT a.student_id, a.event_id, a.staff_id, a.event_title, ec.event_start, ec.event_end, ec.event_date, ec.event_location, ec.event_points, ec.max_capacity
         FROM shp2156.approves a JOIN shp2156.events_created ec
         ON a.event_id = ec.event_id
-        WHERE a.event_id NOT IN (SELECT event_id FROM shp2156.invites);
+        WHERE a.event_id NOT IN (SELECT event_id FROM shp2156.invites)
+        AND a.student_id = %s;
     """
-    events = g.conn.execute(events_query).fetchall()
+    events = g.conn.execute(events_query, (student_id,)).fetchall()
 
     # List to store event titles that were sent invitations for confirmation message
     invited_events = []
