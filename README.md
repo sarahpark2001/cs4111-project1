@@ -1,4 +1,4 @@
-# Columbia W4111 Intro to Databases: Example Webserver
+# Columbia W4111 Intro to Databases: Project 1, Part 3
 
 This repository contains a sample web server setup for managing event planning interactions for the NYC NROTC group. The server is based on a PostgreSQL database and uses Flask as the web framework with SQLAlchemy for database interactions.
 
