@@ -483,17 +483,9 @@ def view_events():
             if action == 'approve':
                 g.conn.execute(
                     """
-                    INSERT INTO shp2156.approves (event_id, event_start, event_end, event_date, event_location, 
-                                                  event_points, max_capacity, student_id, event_title, staff_id)
-                    SELECT event_id, event_start, event_end, event_date, event_location, event_points, 
-                           max_capacity, student_id, event_title, %s
-                    FROM shp2156.events_created
-                    WHERE event_id = %s;
-                    """, (staff_id, event_id)
-                )
-                
-                g.conn.execute(
-                    "DELETE FROM shp2156.events_created WHERE event_id = %s", (event_id,)
+                    INSERT INTO shp2156.approves (student_id, event_id, staff_id, event_title)
+                    VALUES (%s, %s, %s, %s);
+                    """, (event['student_id'], event_id, staff_id, event['event_title'])
                 )
                 
                 approved_events.append(event['event_title'])  #to build message
@@ -539,7 +531,7 @@ def invite():
         # Loop over the submitted form and check for changes
         for event in events:
             event_id = event['event_id']
-            divisions = request.form.getlist(f"divisions_{event_id}")
+            divisions = request.form.getlist(f"invite_{event_id}")
             
             for division in divisions:
                 department_query = """
@@ -553,10 +545,7 @@ def invite():
                 g.conn.execute(
                     """
                     INSERT INTO shp2156.invites (student_id, event_id, staff_id, div_name, dept_name, event_title)
-                    SELECT event_id, event_start, event_end, event_date, event_location, event_points, 
-                           max_capacity, student_id, event_title, staff_id, %s
-                    FROM shp2156.approves
-                    WHERE event_id = %s;
+                    VALUES (%s, %s, %s, %s, %s, %s)
                     """, 
                     (student_id, event_id, event['staff_id'], division, department, event['event_title'])
                 )
