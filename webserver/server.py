@@ -603,7 +603,7 @@ def all_events():
         return redirect('/login')
 
     events_query = """
-        SELECT a.student_id, a.event_id, a.staff_id, a.event_title, ec.event_start, ec.event_end, ec.event_date, ec.event_location, ec.event_points, ec.max_capacity, p.student_id2
+        SELECT a.student_id, a.event_id, a.staff_id, a.event_title, ec.event_start, ec.event_end, ec.event_date, ec.event_location, ec.event_points, ec.max_capacity
         FROM shp2156.approves a JOIN shp2156.events_created ec
         ON a.event_id = ec.event_id;
     """
