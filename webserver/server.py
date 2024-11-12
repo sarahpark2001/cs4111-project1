@@ -597,6 +597,34 @@ def invite():
 
     return render_template('invite.html', events=events)
 
+@app.route('/all_events')
+def all_events():
+    if 'user_id' not in session or session.get('user_type') != 'staff':
+        return redirect('/login')
+
+    events_query = """
+        SELECT a.student_id, a.event_id, a.staff_id, a.event_title, ec.event_start, ec.event_end, ec.event_date, ec.event_location, ec.event_points, ec.max_capacity, p.student_id2
+        FROM shp2156.approves a JOIN shp2156.events_created ec
+        ON a.event_id = ec.event_id
+        LEFT JOIN shp2156.participates p
+        ON a.event_id = p.event_id AND a.student_id = p.student_id;
+    """
+    events = g.conn.execute(events_query).fetchall()
+
+    participants = {}
+    for event in events:
+        event_id = event['event_id']
+        participants_query = """
+            SELECT p.student_id2, sa.name
+            FROM shp2156.participates p
+            JOIN shp2156.Student_Attends sa
+            ON p.student_id2 = sa.student_id
+            WHERE p.event_id = %s
+        """
+        participants[event_id] = g.conn.execute(participants_query, (event_id,)).fetchall()
+
+
+    return render_template('all_events.html', events=events, participants=participants)
 
 
 if __name__ == "__main__":
