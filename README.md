@@ -20,6 +20,8 @@ Our web server enables event planning interactions for the NYC NROTC group. User
 - **/login** - Login page for both students and staff.
 - **/logout** - Logs out the user.
 - **/signup** - Redirects to signup pages for students or staff.
+- **/signup_student** - Form to add new student to Student_Attends table.
+- **/signup_staff** - Form to add new staff to Staffs table.
 - **/student_dashboard** - Dashboard for students to view events, RSVP, and track points.
 - **/staff_dashboard** - Dashboard for staff to view and approve/reject events.
 - **/create_event** - Enables students to create new events (pending approval by staff).
