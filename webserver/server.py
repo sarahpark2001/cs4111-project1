@@ -201,51 +201,63 @@ def rsvp():
             event_date = event['event_date']
             rsvp_status = request.form.get(f"rsvp_{event_id}")
 
+            check_query = """
+                SELECT 1
+                FROM shp2156.participates
+                WHERE student_id = %s AND event_id = %s AND student_id2 = %s AND staff_id = %s AND event_title = %s
+            """
+            check = g.conn.execute(check_query, (event['student_id'], event_id, student_id, event['staff_id'], event_title)).fetchone()
+
             if rsvp_status == 'yes':
-                # Add student to the event if not already signed up
-                g.conn.execute(
-                    """
-                    INSERT INTO shp2156.Participates (student_id, event_id, student_id2, staff_id, event_title)
-                    VALUES (%s, %s, %s, %s, %s)
-                    ON CONFLICT (student_id, event_id, student_id2, staff_id, event_title) DO NOTHING
-                    """,
-                    (event['student_id'], event['event_id'], student_id, event['staff_id'], event_title)
-                )
+                if check:
+                    message += f"You have already RSVPed for '{event_title}' on {event_date}.<br>"
+                else:
+                    # Add student to the event if not already signed up
+                    g.conn.execute(
+                        """
+                        INSERT INTO shp2156.Participates (student_id, event_id, student_id2, staff_id, event_title)
+                        VALUES (%s, %s, %s, %s, %s)
+                        ON CONFLICT (student_id, event_id, student_id2, staff_id, event_title) DO NOTHING
+                        """,
+                        (event['student_id'], event['event_id'], student_id, event['staff_id'], event_title)
+                    )
+                    
+                    # Increase student points by event points on RSVP
+                    g.conn.execute(
+                        """
+                        UPDATE shp2156.student_attends
+                        SET total_points = total_points + %s
+                        WHERE student_id = %s
+                        """,
+                        (event_points, student_id)
+                    )
                 
-                # Increase student points by event points on RSVP
-                g.conn.execute(
-                    """
-                    UPDATE shp2156.student_attends
-                    SET total_points = total_points + %s
-                    WHERE student_id = %s
-                    """,
-                    (event_points, student_id)
-                )
-                
-                message += f"You have RSVPed for '{event_title}' on {event_date}. You earned {event_points} points.<br>"
+                    message += f"You have RSVPed for '{event_title}' on {event_date}. You earned {event_points} points.<br>"
 
             elif rsvp_status == 'no':
-                # Remove student from the event if they cancel RSVP
-                g.conn.execute(
-                    """
-                    DELETE FROM shp2156.Participates 
-                    WHERE event_id = %s AND student_id2 = %s
-                    """,
-                    (event['event_id'], student_id)
-                )
-                
-                # Decrease student points by event points on cancel
-                g.conn.execute(
-                    """
-                    UPDATE shp2156.student_attends
-                    SET total_points = total_points - %s
-                    WHERE student_id = %s
-                    """,
-                    (event_points, student_id)
-                )
+                if check:
+                    # Remove student from the event if they cancel RSVP
+                    g.conn.execute(
+                        """
+                        DELETE FROM shp2156.Participates 
+                        WHERE event_id = %s AND student_id2 = %s
+                        """,
+                        (event['event_id'], student_id)
+                    )
+                    
+                    # Decrease student points by event points on cancel
+                    g.conn.execute(
+                        """
+                        UPDATE shp2156.student_attends
+                        SET total_points = total_points - %s
+                        WHERE student_id = %s
+                        """,
+                        (event_points, student_id)
+                    )
 
-                message += f"You have canceled your RSVP for '{event_title}' on {event_date}. You lost {event_points} points.<br>"
-
+                    message += f"You have canceled your RSVP for '{event_title}' on {event_date}. You lost {event_points} points.<br>"
+                else:
+                    message += f"You have not RSVPed for '{event_title}' on {event_date}.<br>"
         total_points_result = g.conn.execute(
             "SELECT total_points FROM shp2156.student_attends WHERE student_id = %s",
             (student_id,)
