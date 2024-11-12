@@ -605,9 +605,7 @@ def all_events():
     events_query = """
         SELECT a.student_id, a.event_id, a.staff_id, a.event_title, ec.event_start, ec.event_end, ec.event_date, ec.event_location, ec.event_points, ec.max_capacity, p.student_id2
         FROM shp2156.approves a JOIN shp2156.events_created ec
-        ON a.event_id = ec.event_id
-        LEFT JOIN shp2156.participates p
-        ON a.event_id = p.event_id AND a.student_id = p.student_id;
+        ON a.event_id = ec.event_id;
     """
     events = g.conn.execute(events_query).fetchall()
 
