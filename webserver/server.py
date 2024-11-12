@@ -106,6 +106,26 @@ def directory():
 
     return render_template('directory.html', staff_data=staff, student_data=student)
 
+@app.route('/directory_staff')
+def directory_staff():
+    if 'user_id' not in session:
+        return redirect('/login')  
+        
+    staff_query = """
+        SELECT job_title, component, name, phone_number, email
+        FROM shp2156.Staffs
+    """
+    staff = g.conn.execute(staff_query).fetchall()
+
+    student_query = """
+        SELECT sa.name, sa.email, sa.program_option, sa.school_name, sa.year, b.dept_name, b.div_name, sa.total_points
+        FROM shp2156.Student_Attends sa JOIN shp2156.belongs b
+        ON sa.student_id = b.student_id
+    """
+    student = g.conn.execute(student_query).fetchall()
+
+    return render_template('directory_staff.html', staff_data=staff, student_data=student)
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
 
