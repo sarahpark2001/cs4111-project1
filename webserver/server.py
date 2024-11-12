@@ -277,7 +277,7 @@ def rsvp():
 
                     message += f"You have canceled your RSVP for '{event_title}' on {event_date}. You lost {event_points} points.<br>"
                 else:
-                    message += f"You have not RSVPed for '{event_title}' on {event_date}.<br>"
+                    message += f"You have RSVPed NO for '{event_title}' on {event_date}.<br>"
         total_points_result = g.conn.execute(
             "SELECT total_points FROM shp2156.student_attends WHERE student_id = %s",
             (student_id,)
