@@ -31,7 +31,9 @@ Our web server enables event planning interactions for the NYC NROTC group. User
 - **/rsvp** - Students can accept or decline invitations to approved events.
 
 ## Changes from Earlier Stages & Explanations
-*List any changes made from earlier project stages here and provide brief explanations.*
+In our Part 1 Proposal, we briefly mentioned a functionality where students could edit the account details of other students. This doesn't make sense with how we implemented the app. We used unique logins so that everyone is accessing only their own accounts and using those accounts to create events, signup for events, and invite others to events. This functionality was not in our ER diagram or schema (it was something we had considered for our app implementation), so we did not have to make any changes in order to exclude implementation.
+
+We added the event_title (text) attribute to Events_Created, Participates, Approves, and Invites. This helped us to better display events in the web app. Although the unique event_id is sufficient for the database to differentiate, we wanted students and staff to see more information so they could make a decision on approval or attendance. 
 
 ## List of All Schema & How They Are Incorporated
 *Include a list of the database schema along with explanations of how each table or entity is used in the application.*
