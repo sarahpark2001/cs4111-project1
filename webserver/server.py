@@ -18,7 +18,7 @@ Read about it online.
 import os
 from sqlalchemy import *
 from sqlalchemy.pool import NullPool
-from flask import Flask, request, render_template, g, redirect, session, Response, url_for
+from flask import Flask, request, render_template, g, redirect, session, Response, url_for, flash
 import secrets
 import re
 
@@ -137,10 +137,14 @@ def login():
         user_type = request.form['user_type']  
         
         if user_type == 'student':
-            cursor = g.conn.execute(
-                "SELECT name FROM shp2156.Student_Attends WHERE student_id = %s AND password = %s",
-                (user_id, password)
-            )
+            # cursor = g.conn.execute(
+            #     "SELECT name FROM shp2156.Student_Attends WHERE student_id = %s AND password = %s",
+            #     (user_id, password)
+            # )
+            # user = cursor.fetchone()
+            # cursor.close()
+            q = "SELECT name FROM shp2156.Student_Attends WHERE student_id = :student_id AND password = :password;"
+            cursor = g.conn.execute(q, dict(student_id=user_id, password=password))
             user = cursor.fetchone()
             cursor.close()
 
@@ -152,10 +156,14 @@ def login():
                 return redirect('/student_dashboard')
         
         elif user_type == 'staff':
-            cursor = g.conn.execute(
-                "SELECT name FROM shp2156.Staffs WHERE staff_id = %s AND password = %s",
-                (user_id, password)
-            )
+            # cursor = g.conn.execute(
+            #     "SELECT name FROM shp2156.Staffs WHERE staff_id = %s AND password = %s",
+            #     (user_id, password)
+            # )
+            # user = cursor.fetchone()
+            # cursor.close()
+            q = "SELECT name FROM shp2156.staffs WHERE staff_id = :staff_id AND password = :password;"
+            cursor = g.conn.execute(q, dict(staff_id=user_id, password=password))
             user = cursor.fetchone()
             cursor.close()
 
