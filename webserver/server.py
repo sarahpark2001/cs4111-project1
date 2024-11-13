@@ -322,7 +322,7 @@ def rsvp():
 
         return redirect(url_for('student_dashboard', info=message))
 
-    return render_template('rsvp.html', events=events)
+    return render_template('rsvp.html', events=events, invitation_messages=invitation_messages)
 
 
 @app.route('/student_dashboard')
