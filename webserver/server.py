@@ -387,18 +387,33 @@ def signup_student():
         program_option = request.form['program_option']
         year = request.form['year']
 
+        # Validate name
         if not name or not re.match(r"^[A-Za-z\s'-]{2,50}$", name):
-            flash("Name must be 2-50 characters and contain only letters, spaces, apostrophes, or hyphens.", "error")
-            return redirect(url_for('signup'))
+            message = "Name must be 2-50 characters and contain only letters, spaces, apostrophes, or hyphens."
+            return redirect(url_for('signup_student', info=message))
 
+        # Validate email
         email_regex = r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)"
         if not email or not re.match(email_regex, email):
-            flash("Please enter a valid email address.", "error")
-            return redirect(url_for('signup'))
-        
-        if password1 != password2:
-            return render_template('signup_student.html', info="Passwords do not match.")
+            message = "Please enter a valid email address."
+            return redirect(url_for('signup_student', info=message))
 
+        # Check if passwords match
+        if password1 != password2:
+            message = "Passwords do not match."
+            return redirect(url_for('signup_student', info=message))
+
+        
+        dept_divisions = {}
+        for division, department in divisions:
+            if department not in dept_divisions:
+                dept_divisions[department] = []
+            dept_divisions[department].append(division)
+
+        if dept_name not in dept_divisions or div_name not in dept_divisions[dept_name]:
+            message = "Invalid division for the selected department."
+            return redirect(url_for('signup_student', info=message))
+            
         # cursor = g.conn.execute("SELECT * FROM shp2156.Student_Attends WHERE email = %s", (email,))
         # existing_user = cursor.fetchone()
         # cursor.close()
@@ -408,7 +423,8 @@ def signup_student():
         cursor.close()
 
         if existing_user:
-            return render_template('signup_student.html', info="Email already exists.")
+            message = "Email already exists."
+            return redirect(url_for('signup_student', info=message))
 
         cursor = g.conn.execute("SELECT div_name, dept_name FROM division_belongs")
         divisions = cursor.fetchall()
@@ -437,8 +453,12 @@ def signup_student():
         q = "INSERT INTO shp2156.belongs (student_id, div_name, dept_name) VALUES (:student_id, :div_name, :dept_name);"
         g.conn.execute(q, dict(student_id=student_id, div_name=div_name, dept_name=dept_name))
 
-        info_message = f"You have been assigned User ID {student_id}. Please save your User ID and password for future logins."
-        return redirect(url_for('login', info=info_message))
+        # Successful registration message
+        message = f"You have been assigned User ID {student_id}. Please save your User ID and password for future logins."
+        return redirect(url_for('login', info=message))
+
+    # Retrieve `info` from query parameters if present (on redirect)
+    info = request.args.get('info', '')
     
     cursor = g.conn.execute("SELECT school_name FROM schools")
     schools = cursor.fetchall()
