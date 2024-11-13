@@ -23,6 +23,8 @@
           <label><input type="radio" name="user_type" value="staff" required> Staff</label><br><br>
         <input type="submit" value="Sign Up">
     </form>
-    <h1>{{ info }}</h1>
+    {% if info %}
+      <h1>{{ info | safe }}</h1>
+    {% endif %}
   </body>
 </html>
