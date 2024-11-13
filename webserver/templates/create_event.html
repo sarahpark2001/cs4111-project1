@@ -32,7 +32,9 @@
       
       <input type="submit" value="Submit for Approval">
     </form>
-    <h1>{{ info }}</h1>
+    {% if info %}
+      <div class="alert-info">{{ info | safe }}</div>
+    {% endif %}
   </body>
 </html>
 
