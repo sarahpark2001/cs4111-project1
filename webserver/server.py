@@ -199,7 +199,7 @@ def rsvp():
     division_result = g.conn.execute(division_query, (student_id,)).fetchone()
     division = division_result['div_name']
     
-    events_query = """
+    division_events_query = """
         SELECT a.event_id, a.staff_id, ec.student_id, ec.event_title, ec.event_date, ec.event_start, ec.max_capacity, ec.event_points,
                (ec.max_capacity - COUNT(DISTINCT p.student_id2)) AS spots_remaining
         FROM shp2156.invites a
@@ -210,7 +210,39 @@ def rsvp():
         ORDER BY ec.event_date, ec.event_start;
     """
     
-    events = g.conn.execute(events_query, (division,)).fetchall()
+    division_events = g.conn.execute(division_events_query, (division,)).fetchall()
+
+    invitation_messages = []
+    for div_event in division_events:
+        event_title = div_event['event_title']
+        # event_id = div_event['event_id']
+        # event_points = div_event['event_points']
+        event_date = div_event['event_date']
+        # spots_remaining = div_event['spots_remaining']
+        
+        # check_query = """
+        #     SELECT 1
+        #     FROM shp2156.participates
+        #     WHERE student_id = %s AND event_id = %s AND student_id2 = %s AND staff_id = %s AND event_title = %s
+        # """
+        # check = g.conn.execute(check_query, (div_event['student_id'], event_id, student_id, div_event['staff_id'], event_title)).fetchone()
+
+        # if spots_remaining <= 0:
+        #     invitation_messages.append(f"Sorry, '{event_title}' on {event_date} is full.")
+        # elif check:
+        #     invitation_messages.append(f"You have already RSVPed for '{event_title}' on {event_date}.")
+        # else:
+        invitation_messages.append(f"You are invited to RSVP for '{event_title}' on {event_date}!")
+
+    events_query = """
+        SELECT a.event_id, a.staff_id, ec.student_id, ec.event_title, ec.event_date, ec.event_start, ec.max_capacity, ec.event_points, (ec.max_capacity - COUNT(DISTINCT p.student_id2)) AS spots_remaining
+        FROM shp2156.approves a
+        JOIN shp2156.events_created ec ON a.event_id = ec.event_id
+        LEFT JOIN shp2156.Participates p ON ec.event_id = p.event_id 
+        GROUP BY a.event_id, a.staff_id, ec.student_id, ec.event_id, ec.event_title, ec.event_date, ec.event_start, ec.max_capacity, ec.event_points
+        ORDER BY ec.event_date, ec.event_start;
+    """
+    events = g.conn.execute(events_query).fetchall()
 
     if request.method == 'POST':
         message = ""
@@ -231,6 +263,8 @@ def rsvp():
             if rsvp_status == 'yes':
                 if check:
                     message += f"You have already RSVPed for '{event_title}' on {event_date}.<br>"
+                elif event['spots_remaining'] <= 0:
+                    message += f"Sorry, '{event_title}' on {event_date} is full.<br>"
                 else:
                     # Add student to the event if not already signed up
                     g.conn.execute(
@@ -277,7 +311,7 @@ def rsvp():
 
                     message += f"You have canceled your RSVP for '{event_title}' on {event_date}. You lost {event_points} points.<br>"
                 else:
-                    message += f"You have RSVPed NO for '{event_title}' on {event_date}.<br>"
+                    message += f"You have not RSVPed for '{event_title}' on {event_date}.<br>"
         total_points_result = g.conn.execute(
             "SELECT total_points FROM shp2156.student_attends WHERE student_id = %s",
             (student_id,)
