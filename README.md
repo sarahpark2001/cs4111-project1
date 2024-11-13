@@ -28,7 +28,7 @@ Our web server enables event planning interactions for the NYC NROTC group. User
 - **/view_events** - Staff page for approving/rejecting student-created events.
 - **/invite** - Students can send invitations to approved events.
 - **/all_events** - Staff view of all approved events, including participants.
-- **/rsvp** - Students can accept or decline invitations to approved events.
+- **/rsvp** - Students can accept or decline invitations to approved events and sign up for all other approved events.
 
 ## Changes from Earlier Stages & Explanations
 In our Part 1 Proposal, we briefly mentioned a functionality where students could edit the account details of other students. This doesn't make sense with how we implemented the app. We used unique logins so that everyone is accessing only their own accounts and using those accounts to create events, signup for events, and invite others to events. This functionality was not in our ER diagram or schema (it was something we had considered for our app implementation), so we did not have to make any changes in order to exclude implementation.
