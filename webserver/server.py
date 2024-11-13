@@ -517,7 +517,7 @@ def signup_staff():
 
         # Check if passwords match
         if password1 != password2:
-            return render_template('signup_staff.html', info="Passwords do not match.")
+            return redirect(url_for('signup_staff', info="Passwords do not match."))
 
         # Check if email already exists
         # cursor = g.conn.execute("SELECT * FROM shp2156.Staffs WHERE email = %s", (email,))
@@ -533,7 +533,7 @@ def signup_staff():
             existing_user = None
         
         if existing_user:
-            return render_template('signup_staff.html', info="Email already exists.")
+            return redirect(url_for('signup_staff', info="Email already exists."))
 
         # Insert new staff record
         # g.conn.execute(
@@ -551,6 +551,8 @@ def signup_staff():
         # Redirect to login with info message
         info_message = f"You have been assigned User ID {staff_id}. Please save your User ID and password for future logins."
         return redirect(url_for('login', info=info_message))
+
+    info = request.args.get('info', None)
     
     return render_template('signup_staff.html')
 
