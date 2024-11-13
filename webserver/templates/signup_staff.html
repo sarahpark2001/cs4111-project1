@@ -56,7 +56,9 @@
       
       <input type="submit" value="Sign Up As Staff">
     </form>
-    <h1>{{ info }}</h1>
+    {% if info %}
+      <div class="alert-info">{{ info | safe }}</div>
+    {% endif %}
   </body>
 </html>
 
