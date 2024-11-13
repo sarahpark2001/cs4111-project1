@@ -436,7 +436,7 @@ def signup_student():
         g.conn.execute(q, dict(student_id=student_id, email=email, name=name, program_option=program_option, total_points=0, year=year, school_name=school_name, password=password1))
         q = "INSERT INTO shp2156.belongs (student_id, div_name, dept_name) VALUES (:student_id, :div_name, :dept_name);"
         g.conn.execute(q, dict(student_id=student_id, div_name=div_name, dept_name=dept_name))
-        
+
         info_message = f"You have been assigned User ID {student_id}. Please save your User ID and password for future logins."
         return redirect(url_for('login', info=info_message))
     
@@ -480,7 +480,11 @@ def signup_staff():
             return render_template('signup_staff.html', info="Passwords do not match.")
 
         # Check if email already exists
-        cursor = g.conn.execute("SELECT * FROM shp2156.Staffs WHERE email = %s", (email,))
+        # cursor = g.conn.execute("SELECT * FROM shp2156.Staffs WHERE email = %s", (email,))
+        # existing_user = cursor.fetchone()
+        # cursor.close()
+        q = "SELECT * FROM shp2156.Staffs WHERE email = :email;"
+        cursor = g.conn.execute(q, dict(email=email))
         existing_user = cursor.fetchone()
         cursor.close()
         
@@ -488,11 +492,13 @@ def signup_staff():
             return render_template('signup_staff.html', info="Email already exists.")
 
         # Insert new staff record
-        g.conn.execute(
-            "INSERT INTO shp2156.Staffs (staff_id, name, email, password, phone_number, pay_grade, component, job_title) "
-            "VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
-            (staff_id, name, email, password1, phone_number, pay_grade, component, job_title)
-        )
+        # g.conn.execute(
+        #     "INSERT INTO shp2156.Staffs (staff_id, name, email, password, phone_number, pay_grade, component, job_title) "
+        #     "VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
+        #     (staff_id, name, email, password1, phone_number, pay_grade, component, job_title)
+        # )
+        q = "INSERT INTO shp2156.Staffs (staff_id, name, email, password, phone_number, pay_grade, component, job_title) VALUES (:staff_id, :name, :email, :password, :phone_number, :pay_grade, :component, :job_title);"
+        g.conn.execute(q, dict(staff_id=staff_id, name=name, email=email, password=password1, phone_number=phone_number, pay_grade=pay_grade, component=component, job_title=job_title))
         
         # Redirect to login with info message
         info_message = f"You have been assigned User ID {staff_id}. Please save your User ID and password for future logins."
