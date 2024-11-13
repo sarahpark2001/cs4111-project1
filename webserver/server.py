@@ -399,7 +399,11 @@ def signup_student():
         if password1 != password2:
             return render_template('signup_student.html', info="Passwords do not match.")
 
-        cursor = g.conn.execute("SELECT * FROM shp2156.Student_Attends WHERE email = %s", (email,))
+        # cursor = g.conn.execute("SELECT * FROM shp2156.Student_Attends WHERE email = %s", (email,))
+        # existing_user = cursor.fetchone()
+        # cursor.close()
+        q = "SELECT * FROM shp2156.Student_Attends WHERE email = :email;"
+        cursor = g.conn.execute(q, dict(email=email))
         existing_user = cursor.fetchone()
         cursor.close()
 
@@ -418,16 +422,21 @@ def signup_student():
         if dept_name not in dept_divisions or div_name not in dept_divisions[dept_name]:
             return render_template('signup_student.html', info="Invalid division for the selected department.")
 
-        g.conn.execute(
-            "INSERT INTO shp2156.Student_Attends (student_id, email, name, program_option, total_points, year, school_name, password) "
-            "VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
-            (student_id, email, name, program_option, 0, year, school_name, password1)
-        )
-        g.conn.execute(
-            "INSERT INTO shp2156.belongs (student_id, div_name, dept_name) "
-            "VALUES (%s, %s, %s)",
-            (student_id, div_name, dept_name)
-        )
+        # g.conn.execute(
+        #     "INSERT INTO shp2156.Student_Attends (student_id, email, name, program_option, total_points, year, school_name, password) "
+        #     "VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
+        #     (student_id, email, name, program_option, 0, year, school_name, password1)
+        # )
+        # g.conn.execute(
+        #     "INSERT INTO shp2156.belongs (student_id, div_name, dept_name) "
+        #     "VALUES (%s, %s, %s)",
+        #     (student_id, div_name, dept_name)
+        # )
+        q = "INSERT INTO shp2156.Student_Attends (student_id, email, name, program_option, total_points, year, school_name, password) VALUES (:student_id, :email, :name, :program_option, :total_points, :year, :school_name, :password);"
+        g.conn.execute(q, dict(student_id=student_id, email=email, name=name, program_option=program_option, total_points=0, year=year, school_name=school_name, password=password1))
+        q = "INSERT INTO shp2156.belongs (student_id, div_name, dept_name) VALUES (:student_id, :div_name, :dept_name);"
+        g.conn.execute(q, dict(student_id=student_id, div_name=div_name, dept_name=dept_name))
+        
         info_message = f"You have been assigned User ID {student_id}. Please save your User ID and password for future logins."
         return redirect(url_for('login', info=info_message))
     
