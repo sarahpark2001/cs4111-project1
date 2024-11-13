@@ -529,17 +529,22 @@ def create_event():
         points = request.form['points']
 
         # Insert new staff record
-        g.conn.execute(
-            "INSERT INTO shp2156.events_created (event_id, event_start, event_end, event_date, event_location, event_points, max_capacity, student_id, event_title) "
-            "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
-            (event_id, event_start, event_end, date, location, points, max_capacity, student_id, title)
-        )
+        # g.conn.execute(
+        #     "INSERT INTO shp2156.events_created (event_id, event_start, event_end, event_date, event_location, event_points, max_capacity, student_id, event_title) "
+        #     "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
+        #     (event_id, event_start, event_end, date, location, points, max_capacity, student_id, title)
+        # )
+        q = "INSERT INTO shp2156.events_created (event_id, event_start, event_end, event_date, event_location, event_points, max_capacity, student_id, event_title) VALUES (:event_id, :event_start, :event_end, :event_date, :event_location, :event_points, :max_capacity, :student_id, :event_title);"
+        g.conn.execute(q, dict(event_id=event_id, event_start=event_start, event_end=event_end, event_date=date, event_location=location, event_points=points, max_capacity=max_capacity, student_id=student_id, event_title=title))
         
         # Redirect to login with info message
-        student = g.conn.execute(
-            "SELECT name, total_points, program_option FROM shp2156.Student_Attends WHERE student_id = %s",
-            (student_id,)
-        ).fetchone()
+        # student = g.conn.execute(
+        #     "SELECT name, total_points, program_option FROM shp2156.Student_Attends WHERE student_id = %s",
+        #     (student_id,)
+        # ).fetchone()
+        q = "SELECT name, total_points, program_option FROM shp2156.Student_Attends WHERE student_id = :student_id;"
+        student = g.conn.execute(q, dict(student_id=student_id)).fetchone()
+
         info_message = f"Your {title} event has been sent to the staffs for approval!"
         return redirect(url_for('student_dashboard', student=student, info=info_message))
     
