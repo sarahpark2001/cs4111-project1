@@ -275,88 +275,99 @@ def edit_student():
             dept_divisions[department] = []
         dept_divisions[department].append(division)
 
-    # Fetch existing student data for GET request
+    # Fetch existing student data for GET and initial POST request handling
+    student = g.conn.execute(
+        "SELECT name, email, program_option, year, school_name, div_name, dept_name "
+        "FROM shp2156.Student_Attends sa JOIN shp2156.belongs b "
+        "ON sa.student_id = b.student_id WHERE sa.student_id = %s",
+        (student_id,)
+    ).fetchone()
+
+    if not student:
+        return "Student not found", 404
+
+    # Render the form on GET request
     if request.method == 'GET':
-        student = g.conn.execute(
-            "SELECT name, email, program_option, year, school_name, div_name, dept_name "
-            "FROM shp2156.Student_Attends sa JOIN shp2156.belongs b "
-            "ON sa.student_id = b.student_id WHERE sa.student_id = %s",
-            (student_id,)
-        ).fetchone()
-
-        if not student:
-            return "Student not found", 404
-
         return render_template('edit_student.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions)
 
     # Process form submission on POST request
-    if request.method == 'POST':
-        # Retrieve form data
-        name = request.form.get('name')
-        email = request.form.get('email')
-        password1 = request.form.get('password1')
-        password2 = request.form.get('password2')
-        school_name = request.form.get('school_name')
-        dept_name = request.form.get('dept_name')
-        div_name = request.form.get('div_name')
-        program_option = request.form.get('program_option')
-        year = request.form.get('year')
+    # Retrieve form data
+    name = request.form.get('name')
+    email = request.form.get('email')
+    password1 = request.form.get('password1')
+    password2 = request.form.get('password2')
+    school_name = request.form.get('school_name')
+    dept_name = request.form.get('dept_name')
+    div_name = request.form.get('div_name')
+    program_option = request.form.get('program_option')
+    year = request.form.get('year')
 
-        # Validate name and email formats
-        if not name or not re.match(r"^[A-Za-z\s'-]{2,50}$", name):
-            info = "Invalid name format."
+    # Validate name and email formats
+    if not name or not re.match(r"^[A-Za-z\s'-]{2,50}$", name):
+        info = "Invalid name format."
+        return render_template('edit_student.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions, info=info)
+
+    email_regex = r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)"
+    if not email or not re.match(email_regex, email):
+        info = "Invalid email format."
+        return render_template('edit_student.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions, info=info)
+
+    # Check for duplicate email only if the email was changed
+    if email != student.email:
+        duplicate_email = g.conn.execute(
+            "SELECT student_id FROM shp2156.Student_Attends WHERE email = %s AND student_id != %s",
+            (email, student_id)
+        ).fetchone()
+
+        if duplicate_email:
+            info = "This email is already in use by another student."
             return render_template('edit_student.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions, info=info)
 
-        email_regex = r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)"
-        if not email or not re.match(email_regex, email):
-            info = "Invalid email format."
+    # Check if passwords match
+    if password1 or password2:
+        if password1 != password2:
+            info = "Passwords do not match."
             return render_template('edit_student.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions, info=info)
-        
-        # Check if passwords match
-        if password1 or password2:
-            if password1 != password2:
-                info = "Passwords do not match."
-                return render_template('edit_student.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions, info=info)
 
-        # Ensure the department and division are valid
-        if dept_name not in dept_divisions or div_name not in dept_divisions[dept_name]:
-            info = "Invalid division for the selected department."
-            return render_template('edit_student.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions, info=info)
-        
-        # Prepare the update statements
-        try:
-            # Update `Student_Attends`
-            if password1:
-                g.conn.execute(
-                    "UPDATE shp2156.Student_Attends SET name = %s, email = %s, program_option = %s, "
-                    "year = %s, school_name = %s, password = %s WHERE student_id = %s",
-                    (name, email, program_option, year, school_name, password1, student_id)
-                )
-            else:
-                # Update without changing the password
-                g.conn.execute(
-                    "UPDATE shp2156.Student_Attends SET name = %s, email = %s, program_option = %s, "
-                    "year = %s, school_name = %s WHERE student_id = %s",
-                    (name, email, program_option, year, school_name, student_id)
-                )
-            
-            # Update `belongs`
+    # Ensure the department and division are valid
+    if dept_name not in dept_divisions or div_name not in dept_divisions[dept_name]:
+        info = "Invalid division for the selected department."
+        return render_template('edit_student.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions, info=info)
+
+    # Prepare the update statements
+    try:
+        # Update `Student_Attends`
+        if password1:
             g.conn.execute(
-                "UPDATE shp2156.belongs SET div_name = %s, dept_name = %s WHERE student_id = %s",
-                (div_name, dept_name, student_id)
+                "UPDATE shp2156.Student_Attends SET name = %s, email = %s, program_option = %s, "
+                "year = %s, school_name = %s, password = %s WHERE student_id = %s",
+                (name, email, program_option, year, school_name, password1, student_id)
+            )
+        else:
+            # Update without changing the password
+            g.conn.execute(
+                "UPDATE shp2156.Student_Attends SET name = %s, email = %s, program_option = %s, "
+                "year = %s, school_name = %s WHERE student_id = %s",
+                (name, email, program_option, year, school_name, student_id)
             )
 
-            # Redirect based on user type
-            if user_type == 'staff':
-                info_message = f"Student information for {name} (ID: {student_id}) has been updated successfully."
-                return redirect(url_for('staff_dashboard', info=info_message))
-            else:
-                info_message = "Your information has been updated successfully."
-                return redirect(url_for('student_dashboard', info=info_message))
-        
-        except Exception as e:
-            print("Error updating student information:", e)
-            return render_template('edit_student.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions, info="An error occurred while updating the information.")
+        # Update `belongs`
+        g.conn.execute(
+            "UPDATE shp2156.belongs SET div_name = %s, dept_name = %s WHERE student_id = %s",
+            (div_name, dept_name, student_id)
+        )
+
+        # Redirect based on user type
+        if user_type == 'staff':
+            info_message = f"Student information for {name} (ID: {student_id}) has been updated successfully."
+            return redirect(url_for('staff_dashboard', info=info_message))
+        else:
+            info_message = "Your information has been updated successfully."
+            return redirect(url_for('student_dashboard', info=info_message))
+
+    except Exception as e:
+        print("Error updating student information:", e)
+        return render_template('edit_student.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions, info="An error occurred while updating the information.")
 
 
 @app.route('/login', methods=['GET', 'POST'])
