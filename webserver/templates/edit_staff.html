@@ -4,6 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Staff Information</title>
+    <style>
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        input, select, button {
+            margin-top: 5px;
+            padding: 5px;
+            width: 100%;
+            max-width: 400px;
+        }
+        .form-container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+        }
+        .alert-info {
+            color: green;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
     <div class="form-container">
@@ -15,38 +38,68 @@
 
         <form method="POST" action="/edit_staff">
             <label for="name">Name:</label>
-            <input type="text" id="name" name="name" value="{{ staff.name }}" pattern="^[A-Za-z\s'-]{2,50}$">
+            <input type="text" id="name" name="name" value="{{ staff.name }}" pattern="^[A-Za-z\s'-]{2,50}$" required>
 
             <label for="email">Email:</label>
-            <input type="email" id="email" name="email" value="{{ staff.email }}">
-
-            <label for="password1">New Password:</label>
-            <input type="password" id="password1" name="password1" placeholder="Enter new password">
-
-            <label for="password2">Confirm New Password:</label>
-            <input type="password" id="password2" name="password2" placeholder="Confirm new password">
+            <input type="email" id="email" name="email" value="{{ staff.email }}" required>
 
             <label for="phone_number">Phone Number (###-###-####):</label>
-            <input type="tel" id="phone_number" name="phone_number" value="{{ staff.phone_number }}" pattern="^\d{3}-\d{3}-\d{4}$" placeholder="123-456-7890">
+            <input type="tel" id="phone_number" name="phone_number" value="{{ staff.phone_number }}" pattern="^\d{3}-\d{3}-\d{4}$" placeholder="123-456-7890" required>
 
             <label for="job_title">Job Title:</label>
-            <input type="text" id="job_title" name="job_title" value="{{ staff.job_title }}">
+            <input type="text" id="job_title" name="job_title" value="{{ staff.job_title }}" required>
 
             <label for="component">Component:</label>
-            <select id="component" name="component">
+            <select id="component" name="component" required onchange="updatePayGradeOptions()">
                 <option value="USMC" {% if staff.component == 'USMC' %}selected{% endif %}>USMC</option>
                 <option value="USN" {% if staff.component == 'USN' %}selected{% endif %}>USN</option>
+                <option value="USNR" {% if staff.component == 'USNR' %}selected{% endif %}>USNR</option>
+                <option value="Civilian" {% if staff.component == 'Civilian' %}selected{% endif %}>Civilian</option>
             </select>
 
             <label for="pay_grade">Pay Grade:</label>
-            <select id="pay_grade" name="pay_grade">
-                {% for grade, title in ranks[staff.component].items() %}
-                    <option value="{{ grade }}" {% if staff.pay_grade == grade %}selected{% endif %}>{{ title }}</option>
-                {% endfor %}
+            <select id="pay_grade" name="pay_grade" required>
+                {% if staff.component == 'Civilian' %}
+                    <option value="Staff" selected>Staff</option>
+                {% else %}
+                    {% set component_ranks = ranks['USN'] if staff.component == 'USNR' else ranks[staff.component] %}
+                    {% for grade, title in component_ranks.items() %}
+                        <option value="{{ grade }}" {% if staff.pay_grade == grade %}selected{% endif %}>{{ title }}</option>
+                    {% endfor %}
+                {% endif %}
             </select>
 
             <button type="submit">Update Information</button>
         </form>
     </div>
+
+    <script>
+        function updatePayGradeOptions() {
+            const component = document.getElementById("component").value;
+            const payGradeSelect = document.getElementById("pay_grade");
+
+            // Clear existing options
+            payGradeSelect.innerHTML = "";
+
+            if (component === "Civilian") {
+                // Add "Staff" option for Civilian
+                const option = document.createElement("option");
+                option.value = "Staff";
+                option.textContent = "Staff";
+                payGradeSelect.appendChild(option);
+            } else {
+                // Populate pay grades based on component (USN or USMC)
+                const ranks = {{ ranks | tojson }};
+                const selectedRanks = component === "USNR" ? ranks["USN"] : ranks[component];
+
+                for (const grade in selectedRanks) {
+                    const option = document.createElement("option");
+                    option.value = grade;
+                    option.textContent = selectedRanks[grade];
+                    payGradeSelect.appendChild(option);
+                }
+            }
+        }
+    </script>
 </body>
 </html>
