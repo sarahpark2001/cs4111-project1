@@ -617,10 +617,10 @@ def create_event():
             event_start_time = datetime.strptime(event_start, '%H:%M').time()
             event_end_time = datetime.strptime(event_end, '%H:%M').time()
         except ValueError:
-            return redirect(url_for('create_event.html', info=f"{event_start}"))
+            return redirect(url_for('create_event', info=f"{event_start}"))
         # Check if event start is before event end
         if event_start_time >= event_end_time:
-            return redirect(url_for('create_event.html', info="Event start time must be before event end time."))
+            return redirect(url_for('create_event', info="Event start time must be before event end time."))
 
         # Insert new staff record
         try:
