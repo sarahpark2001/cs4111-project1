@@ -604,11 +604,10 @@ def create_event():
         if title == '' or location == '' or date == '' or event_start == '' or event_end == '' or max_capacity == '' or points == '':
             return redirect(url_for('create_event.html', info="All fields are required."))
 
-        print(date)
-        try:
-            event_date = datetime.strptime(date, '%Y-%m-%d').date()
-        except ValueError:
-            return redirect(url_for('create_event', info=f"event: {date}"))
+        # try:
+        event_date = datetime.strptime(date, '%Y-%m-%d').date()
+        # except ValueError:
+        #     return redirect(url_for('create_event', info=f"event: {date}"))
 
         # Check if event date is in the future
         if event_date < datetime.now().date():
@@ -618,7 +617,7 @@ def create_event():
             event_start_time = datetime.strptime(event_start, '%H:%M').time()
             event_end_time = datetime.strptime(event_end, '%H:%M').time()
         except ValueError:
-            return redirect(url_for('create_event', info="Invalid time format. Please use HH:MM."))
+            return redirect(url_for('create_event.html', info=f"{event_start}"))
         # Check if event start is before event end
         if event_start_time >= event_end_time:
             return redirect(url_for('create_event.html', info="Event start time must be before event end time."))
