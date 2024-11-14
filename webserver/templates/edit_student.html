@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Student Information</title>
+    <style>
+        /* Simple styling for better readability */
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        input, select, button {
+            margin-top: 5px;
+            padding: 5px;
+            width: 100%;
+            max-width: 400px;
+        }
+        .form-container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+        }
+        .alert-info {
+            color: green;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1>Edit Your Information</h1>
+
+        {% if info %}
+            <div class="alert-info">{{ info }}</div>
+        {% endif %}
+
+        <form method="POST" action="/edit_student">
+            <!-- Prepopulate fields with existing data for the user to edit -->
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" value="{{ student.name }}" required pattern="^[A-Za-z\s'-]{2,50}$">
+
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" value="{{ student.email }}" required>
+
+            <label for="password1">New Password:</label>
+            <input type="password" id="password1" name="password1" placeholder="Enter new password">
+
+            <label for="password2">Confirm New Password:</label>
+            <input type="password" id="password2" name="password2" placeholder="Confirm new password">
+
+            <label for="school_name">School Name:</label>
+            <select id="school_name" name="school_name" required>
+                {% for school in schools %}
+                    <option value="{{ school.school_name }}" {% if student.school_name == school.school_name %}selected{% endif %}>{{ school.school_name }}</option>
+                {% endfor %}
+            </select>
+
+            <label for="dept_name">Department:</label>
+            <select id="dept_name" name="dept_name" required onchange="updateDivisions()">
+                {% for dept in departments %}
+                    <option value="{{ dept.dept_name }}" {% if student.dept_name == dept.dept_name %}selected{% endif %}>{{ dept.dept_name }}</option>
+                {% endfor %}
+            </select>
+
+            <label for="div_name">Division:</label>
+            <select id="div_name" name="div_name" required>
+                {% for div in dept_divisions[student.dept_name] %}
+                    <option value="{{ div }}" {% if student.div_name == div %}selected{% endif %}>{{ div }}</option>
+                {% endfor %}
+            </select>
+
+            <label for="program_option">Program Option:</label>
+            <input type="text" id="program_option" name="program_option" value="{{ student.program_option }}" required>
+
+            <label for="year">Year:</label>
+            <input type="number" id="year" name="year" value="{{ student.year }}" min="1" max="6" required>
+
+            <button type="submit">Update Information</button>
+        </form>
+    </div>
+
+    <script>
+        const deptDivisions = {{ dept_divisions | tojson }};
+        
+        function updateDivisions() {
+            const deptSelect = document.getElementById("dept_name");
+            const divSelect = document.getElementById("div_name");
+            const selectedDept = deptSelect.value;
+            
+            // Clear existing options
+            divSelect.innerHTML = "";
+            
+            // Add options for the selected department
+            if (deptDivisions[selectedDept]) {
+                deptDivisions[selectedDept].forEach(div => {
+                    const option = document.createElement("option");
+                    option.value = div;
+                    option.textContent = div;
+                    divSelect.appendChild(option);
+                });
+            }
+        }
+    </script>
+</body>
+</html>
