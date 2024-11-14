@@ -284,7 +284,7 @@ def manage_student_modify():
 
     if request.method == 'GET':
         return render_template(
-            'student_form.html',
+            'edit_student.html',
             page_title="Modify Student Information",
             form_action=url_for('manage_student_modify', student_id=student_id),
             student=student,
@@ -312,10 +312,10 @@ def manage_student_modify():
         ).fetchone()
 
         if duplicate_email:
-            return render_template('manage_student_modify.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions, info="This email is already in use by another student.")
+            return render_template('edit_student.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions, info="This email is already in use by another student.")
 
     if password1 != password2:
-        return render_template('manage_student_modify.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions, info="Passwords do not match.")
+        return render_template('edit_student.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions, info="Passwords do not match.")
 
     try:
         # Update `Student_Attends`
@@ -340,7 +340,7 @@ def manage_student_modify():
 
     except Exception as e:
         print("Error updating student information:", e)
-        return render_template('manage_student_modify.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions, info="An error occurred while updating the student's information.")
+        return render_template('edit_student.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions, info="An error occurred while updating the student's information.")
 
 
 @app.route('/edit_student', methods=['GET', 'POST'])
