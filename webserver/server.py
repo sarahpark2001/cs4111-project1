@@ -127,6 +127,84 @@ def directory_staff():
 
     return render_template('directory_staff.html', staff_data=staff, student_data=student)
 
+@app.route('/edit_student', methods=['GET', 'POST'])
+def edit_student():
+    if 'user_id' not in session or session.get('user_type') != 'student':
+        return redirect('/login')
+
+    student_id = session['user_id']
+
+    # Fetch existing student data
+    student = g.conn.execute(
+        "SELECT name, email, program_option, year, school_name, password, div_name, dept_name "
+        "FROM shp2156.Student_Attends sa JOIN shp2156.belongs b "
+        "ON sa.student_id = b.student_id WHERE sa.student_id = %s",
+        (student_id,)
+    ).fetchone()
+
+    # Prepopulate the form fields with current values
+    if request.method == 'GET':
+        cursor = g.conn.execute("SELECT school_name FROM schools")
+        schools = cursor.fetchall()
+
+        cursor = g.conn.execute("SELECT dept_name FROM departments")
+        departments = cursor.fetchall()
+
+        cursor = g.conn.execute("SELECT div_name, dept_name FROM division_belongs")
+        divisions = cursor.fetchall()
+
+        dept_divisions = {}
+        for division, department in divisions:
+            if department not in dept_divisions:
+                dept_divisions[department] = []
+            dept_divisions[department].append(division)
+
+        return render_template('edit_student.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions)
+
+    # Process form submission on POST
+    if request.method == 'POST':
+        name = request.form['name']
+        email = request.form['email']
+        password1 = request.form['password1']
+        password2 = request.form['password2']
+        school_name = request.form['school_name']
+        dept_name = request.form['dept_name']
+        div_name = request.form['div_name']
+        program_option = request.form['program_option']
+        year = request.form['year']
+
+        # Check for valid name and email format
+        if not name or not re.match(r"^[A-Za-z\s'-]{2,50}$", name):
+            return render_template('edit_student.html', student=student, info="Invalid name format.")
+
+        email_regex = r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)"
+        if not email or not re.match(email_regex, email):
+            return render_template('edit_student.html', student=student, info="Invalid email format.")
+        
+        # Check for password match
+        if password1 != password2:
+            return render_template('edit_student.html', student=student, info="Passwords do not match.")
+        
+        # Ensure the department and division are valid
+        if dept_name not in dept_divisions or div_name not in dept_divisions[dept_name]:
+            return render_template('edit_student.html', student=student, info="Invalid division for the selected department.")
+        
+        # Update student information
+        g.conn.execute(
+            "UPDATE shp2156.Student_Attends SET name = %s, email = %s, program_option = %s, "
+            "year = %s, school_name = %s, password = %s WHERE student_id = %s",
+            (name, email, program_option, year, school_name, password1, student_id)
+        )
+        
+        g.conn.execute(
+            "UPDATE shp2156.belongs SET div_name = %s, dept_name = %s WHERE student_id = %s",
+            (div_name, dept_name, student_id)
+        )
+
+        info_message = "Your information has been updated successfully."
+        return redirect(url_for('student_dashboard', info=info_message))
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
 
