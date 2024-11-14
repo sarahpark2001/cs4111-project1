@@ -39,7 +39,7 @@ Our web server enables event planning interactions for the NYC NROTC group. User
 
 ## Changes from Earlier Stages & Explanations
 
-In our Part 1 Proposal, we suggested a functionality where students could edit the account details of other students. However, during the development process, we realized that this approach conflicted with our app’s permissions structure and use-case. In our implementation, each user can access only their own account to create events, sign up for events, and send invitations. Instead, we implemented a feature where staff can modify or delete student records, which better aligns with the app’s permissions model.
+In our Part 1 Proposal, we suggested a functionality where students could edit the account details of other students. However, during the development process, we realized that this approach conflicted with our app’s permissions structure and use-case. In our implementation, each student can access only their own account to create events, sign up for events, and send invitations. Instead, we implemented a feature where staff can modify or delete student records, which better aligns with the app’s permissions model.
 
 To support this feature, we modified the foreign key constraint on the `Belongs` table to include `ON DELETE CASCADE`. This adjustment allows related entries in `Belongs` to be automatically removed when a corresponding student record is deleted from `Student_Attends`, facilitating staff’s ability to delete student records without triggering foreign key violations and enhancing data integrity in the application.
 
