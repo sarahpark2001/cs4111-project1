@@ -608,7 +608,7 @@ def create_event():
         try:
             event_date = datetime.strptime(date, '%Y-%m-%d').date()
         except ValueError:
-            return redirect(url_for('create_event', info="Invalid date format. Please use YYYY/MM/DD."))
+            return redirect(url_for('create_event', info=f"event: {date}"))
 
         # Check if event date is in the future
         if event_date < datetime.now().date():
