@@ -420,7 +420,7 @@ def edit_student():
         ).fetchone()
 
         return render_template(
-            'student_form.html',
+            'edit_student.html',
             page_title="Edit Your Information",
             form_action=url_for('edit_student'),
             student=student,
