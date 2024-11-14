@@ -208,6 +208,22 @@ def edit_student():
 
     student_id = session['user_id']
 
+    # Fetch school, department, and division data needed for both GET and POST requests
+    cursor = g.conn.execute("SELECT school_name FROM schools")
+    schools = cursor.fetchall()
+
+    cursor = g.conn.execute("SELECT dept_name FROM departments")
+    departments = cursor.fetchall()
+
+    cursor = g.conn.execute("SELECT div_name, dept_name FROM division_belongs")
+    divisions = cursor.fetchall()
+
+    dept_divisions = {}
+    for division, department in divisions:
+        if department not in dept_divisions:
+            dept_divisions[department] = []
+        dept_divisions[department].append(division)
+
     # Fetch existing student data for GET request
     if request.method == 'GET':
         student = g.conn.execute(
@@ -217,35 +233,20 @@ def edit_student():
             (student_id,)
         ).fetchone()
 
-        cursor = g.conn.execute("SELECT school_name FROM schools")
-        schools = cursor.fetchall()
-
-        cursor = g.conn.execute("SELECT dept_name FROM departments")
-        departments = cursor.fetchall()
-
-        cursor = g.conn.execute("SELECT div_name, dept_name FROM division_belongs")
-        divisions = cursor.fetchall()
-
-        dept_divisions = {}
-        for division, department in divisions:
-            if department not in dept_divisions:
-                dept_divisions[department] = []
-            dept_divisions[department].append(division)
-
         return render_template('edit_student.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions)
 
     # Process form submission on POST request
     if request.method == 'POST':
         # Retrieve form data
-        name = request.form['name']
-        email = request.form['email']
-        password1 = request.form['password1']
-        password2 = request.form['password2']
-        school_name = request.form['school_name']
-        dept_name = request.form['dept_name']
-        div_name = request.form['div_name']
-        program_option = request.form['program_option']
-        year = request.form['year']
+        name = request.form.get('name')
+        email = request.form.get('email')
+        password1 = request.form.get('password1')
+        password2 = request.form.get('password2')
+        school_name = request.form.get('school_name')
+        dept_name = request.form.get('dept_name')
+        div_name = request.form.get('div_name')
+        program_option = request.form.get('program_option')
+        year = request.form.get('year')
 
         # Validate name and email formats
         if not name or not re.match(r"^[A-Za-z\s'-]{2,50}$", name):
@@ -269,31 +270,35 @@ def edit_student():
             return render_template('edit_student.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions, info=info)
         
         # Prepare the update statements
-        # Update `Student_Attends`
-        if password1:
+        try:
+            # Update `Student_Attends`
+            if password1:
+                g.conn.execute(
+                    "UPDATE shp2156.Student_Attends SET name = %s, email = %s, program_option = %s, "
+                    "year = %s, school_name = %s, password = %s WHERE student_id = %s",
+                    (name, email, program_option, year, school_name, password1, student_id)
+                )
+            else:
+                # Update without changing the password
+                g.conn.execute(
+                    "UPDATE shp2156.Student_Attends SET name = %s, email = %s, program_option = %s, "
+                    "year = %s, school_name = %s WHERE student_id = %s",
+                    (name, email, program_option, year, school_name, student_id)
+                )
+            
+            # Update `belongs`
             g.conn.execute(
-                "UPDATE shp2156.Student_Attends SET name = %s, email = %s, program_option = %s, "
-                "year = %s, school_name = %s, password = %s WHERE student_id = %s",
-                (name, email, program_option, year, school_name, password1, student_id)
+                "UPDATE shp2156.belongs SET div_name = %s, dept_name = %s WHERE student_id = %s",
+                (div_name, dept_name, student_id)
             )
-        else:
-            # Update without changing the password
-            g.conn.execute(
-                "UPDATE shp2156.Student_Attends SET name = %s, email = %s, program_option = %s, "
-                "year = %s, school_name = %s WHERE student_id = %s",
-                (name, email, program_option, year, school_name, student_id)
-            )
+
+            # Redirect to student dashboard with success message
+            info_message = "Your information has been updated successfully."
+            return redirect(url_for('student_dashboard', info=info_message))
         
-        # Update `belongs`
-        g.conn.execute(
-            "UPDATE shp2156.belongs SET div_name = %s, dept_name = %s WHERE student_id = %s",
-            (div_name, dept_name, student_id)
-        )
-
-        # Redirect to student dashboard with success message
-        info_message = "Your information has been updated successfully."
-        return redirect(url_for('student_dashboard', info=info_message))
-
+        except Exception as e:
+            print("Error updating student information:", e)
+            return render_template('edit_student.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions, info="An error occurred while updating your information.")
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
