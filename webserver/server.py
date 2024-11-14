@@ -605,7 +605,7 @@ def create_event():
             return redirect(url_for('create_event.html', info="All fields are required."))
 
         # Check if event date is in the future
-        if date < str(datetime.date.today()):
+        if date < str(datetime.date.today):
             return redirect(url_for('create_event.html', info="Event date must be in the future."))
         
         # Check if event start is before event end
