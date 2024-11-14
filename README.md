@@ -43,6 +43,8 @@ In Part 1, we proposed a functionality where students could edit and delete othe
 
 To support this feature, we modified the foreign key constraint on the `Belongs` and `Participates` tables to include `ON DELETE CASCADE`. This adjustment allows related entries in these tables to be automatically removed when a corresponding student record is deleted from `Student_Attends.` This update facilitates the staff's ability to delete student records without triggering foreign key violations, enhancing data integrity across the application. 
 
+We also implemented edit features for both students and staff, allowing users to modify their own information. This self-edit capability enables users to keep their profiles up-to-date while adhering to the app's permissions structure.
+
 Additionally, we added an `event_title` attribute (text) to the `Events_Created`, `Participates`, `Approves`, and `Invites` tables, incorporating it into the keys of these tables. While the unique `event_id` is sufficient for database management, `event_title` provides more contextual information for students and staff when deciding on event approvals and attendance, improving the user experience in the web app.
 
 Beyond these schema changes, we expanded our implementation with many other new details. For instance, a new student’s default `total_points` is set to 0 upon signup. We added functionality to auto-assign `staff_id` and `student_id` as one higher than the current highest value to ensure uniqueness. To maintain data integrity, we implemented regex checks for names, phone numbers, and emails to prevent junk data from being stored. 
