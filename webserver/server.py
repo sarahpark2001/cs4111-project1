@@ -604,6 +604,7 @@ def create_event():
         if title == '' or location == '' or date == '' or event_start == '' or event_end == '' or max_capacity == '' or points == '':
             return redirect(url_for('create_event.html', info="All fields are required."))
 
+        print(date)
         try:
             event_date = datetime.strptime(date, '%Y-%m-%d').date()
         except ValueError:
