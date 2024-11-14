@@ -35,6 +35,7 @@ Our web server enables event planning interactions for the NYC NROTC group. User
 - **/manage_student_action** - Handles the action selected in `/manage_student` (either modify or delete), and routes the user accordingly.
 - **/manage_student_modify** - Allows staff to modify student information, similar to `/edit_student` but with administrative permissions.
 - **/confirm_delete_student** - Separate page for staff to confirm deletion of a student after choosing the delete option, displaying a final confirmation prompt for the action.
+- **/school_dept_info** - A directory of schools, departments, and divisions for students and staff to view.
 
 
 ## Changes from Earlier Stages & Explanations
