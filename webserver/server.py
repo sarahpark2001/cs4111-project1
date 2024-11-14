@@ -480,18 +480,18 @@ def signup_staff():
         job_title = request.form['job_title']
 
         if name == '' or email == '' or password1 == '' or password2 == '' or phone_number == '' or pay_grade == '' or component == '' or job_title == '':
-            return redirect(url_for('signup_staff.html', info="All fields are required."))
+            return redirect(url_for('signup_staff', info="All fields are required."))
         
         # Validate name
         if not name or not re.match(r"^[A-Za-z\s'-]{2,50}$", name):
             message = "Name must be 2-50 characters and contain only letters, spaces, apostrophes, or hyphens."
-            return redirect(url_for('signup_student', info=message))
+            return redirect(url_for('signup_staff', info=message))
 
         # Validate email
         email_regex = r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)"
         if not email or not re.match(email_regex, email):
             message = "Please enter a valid email address."
-            return redirect(url_for('signup_student', info=message))
+            return redirect(url_for('signup_staff', info=message))
 
         # Check if passwords match
         if password1 != password2:
@@ -518,7 +518,7 @@ def signup_staff():
             )
         except Exception as e:
             print(e)
-            return render_template('signup_staff.html', info="Error creating staff account.")
+            return redirect(url_for('signup_staff', info="Error creating staff account."))
 
         # Redirect to login with info message
         info_message = f"You have been assigned User ID {staff_id}. Please save your User ID and password for future logins."
