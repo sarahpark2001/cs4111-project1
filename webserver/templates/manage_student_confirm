@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirm Manage Student</title>
+</head>
+<body>
+    <h1>Manage Student</h1>
+
+    <p>You selected student: {{ student.name }} (ID: {{ student.student_id }})</p>
+
+    <form method="POST" action="/manage_student_action">
+        <input type="hidden" name="student_id" value="{{ student.student_id }}">
+
+        <button type="submit" name="action" value="modify">Modify</button>
+        <button type="submit" name="action" value="delete">Delete</button>
+    </form>
+
+    {% if info %}
+        <div class="alert-info">{{ info }}</div>
+    {% endif %}
+
+    {% if action == 'delete' %}
+        <form method="POST" action="/manage_student_action">
+            <input type="hidden" name="student_id" value="{{ student.student_id }}">
+            <p>Are you sure? This action is not reversible.</p>
+            <button type="submit" name="confirm" value="yes">Yes, delete</button>
+            <button type="submit" name="confirm" value="no">Cancel</button>
+        </form>
+    {% endif %}
+</body>
+</html>
