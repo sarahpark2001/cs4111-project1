@@ -250,16 +250,16 @@ def edit_staff():
 def edit_student():
     if 'user_id' not in session:
         return redirect('/login')
-    
-    # Determine the student_id to edit; if none is provided, default to the logged-in student's ID
+
+    # Capture the current student_id to be edited
     student_id = request.args.get('student_id') or session['user_id']
     user_type = session.get('user_type')
 
-    # Ensure that only staff can edit other students' profiles
+    # Only staff can edit other students' profiles
     if user_type != 'staff' and student_id != session['user_id']:
-        return redirect('/login')  # Only staff can edit other users
+        return redirect('/login')  # Redirect unauthorized access
 
-    # Fetch school, department, and division data for form
+    # Retrieve form data and additional required information for form population
     cursor = g.conn.execute("SELECT school_name FROM schools")
     schools = cursor.fetchall()
 
@@ -275,7 +275,7 @@ def edit_student():
             dept_divisions[department] = []
         dept_divisions[department].append(division)
 
-    # Fetch existing student data for GET and initial POST request handling
+    # Fetch the current student's data for initial form population
     student = g.conn.execute(
         "SELECT name, email, program_option, year, school_name, div_name, dept_name "
         "FROM shp2156.Student_Attends sa JOIN shp2156.belongs b "
@@ -286,12 +286,11 @@ def edit_student():
     if not student:
         return "Student not found", 404
 
-    # Render the form on GET request
+    # On GET request, render the form with the current student data
     if request.method == 'GET':
         return render_template('edit_student.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions)
 
-    # Process form submission on POST request
-    # Retrieve form data
+    # Handle form submission (POST request)
     name = request.form.get('name')
     email = request.form.get('email')
     password1 = request.form.get('password1')
@@ -302,7 +301,7 @@ def edit_student():
     program_option = request.form.get('program_option')
     year = request.form.get('year')
 
-    # Validate name and email formats
+    # Validation: name and email formats
     if not name or not re.match(r"^[A-Za-z\s'-]{2,50}$", name):
         info = "Invalid name format."
         return render_template('edit_student.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions, info=info)
@@ -312,7 +311,7 @@ def edit_student():
         info = "Invalid email format."
         return render_template('edit_student.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions, info=info)
 
-    # Check for duplicate email only if the email was changed
+    # Only check for duplicate email if the email has changed
     if email != student.email:
         duplicate_email = g.conn.execute(
             "SELECT student_id FROM shp2156.Student_Attends WHERE email = %s AND student_id != %s",
@@ -323,7 +322,7 @@ def edit_student():
             info = "This email is already in use by another student."
             return render_template('edit_student.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions, info=info)
 
-    # Check if passwords match
+    # Check if passwords match (if provided)
     if password1 or password2:
         if password1 != password2:
             info = "Passwords do not match."
@@ -334,7 +333,7 @@ def edit_student():
         info = "Invalid division for the selected department."
         return render_template('edit_student.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions, info=info)
 
-    # Prepare the update statements
+    # Attempt to update the student's data
     try:
         # Update `Student_Attends`
         if password1:
@@ -357,14 +356,10 @@ def edit_student():
             (div_name, dept_name, student_id)
         )
 
-        # Redirect based on user type
-        if user_type == 'staff':
-            info_message = f"Student information for {name} (ID: {student_id}) has been updated successfully."
-            return redirect(url_for('staff_dashboard', info=info_message))
-        else:
-            info_message = "Your information has been updated successfully."
-            return redirect(url_for('student_dashboard', info=info_message))
-
+        # Redirect to appropriate dashboard with success message, passing the correct `student_id`
+        info_message = f"Student information for {name} (ID: {student_id}) has been updated successfully." if user_type == 'staff' else "Your information has been updated successfully."
+        return redirect(url_for('staff_dashboard', info=info_message) if user_type == 'staff' else url_for('student_dashboard', info=info_message))
+    
     except Exception as e:
         print("Error updating student information:", e)
         return render_template('edit_student.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions, info="An error occurred while updating the information.")
