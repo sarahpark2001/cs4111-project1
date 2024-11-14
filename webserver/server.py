@@ -402,7 +402,7 @@ def signup_student():
         year = request.form['year']
 
         if name == '' or email == '' or password1 == '' or password2 == '' or school_name == '' or dept_name == '' or div_name == '' or program_option == '' or year == '':
-            return render_template('signup_student.html', info="All fields are required.")
+            return redirect(url_for('signup_student.html', info="All fields are required."))
 
         # Validate name
         if not name or not re.match(r"^[A-Za-z\s'-]{2,50}$", name):
@@ -458,7 +458,7 @@ def signup_student():
             dept_divisions[department].append(division)
 
         if dept_name not in dept_divisions or div_name not in dept_divisions[dept_name]:
-            return render_template('signup_student.html', info="Invalid division for the selected department.")
+            return redirect(url_for('signup_student.html', info="Invalid division for the selected department."))
 
         try:
             g.conn.execute(
@@ -468,7 +468,7 @@ def signup_student():
             )
         except Exception as e:
             print(e)
-            return render_template('signup_student.html', info="Error creating student account.")
+            return redirect(url_for('signup_student.html', info="Error creating student account."))
         try:
             g.conn.execute(
                 "INSERT INTO shp2156.belongs (student_id, div_name, dept_name) "
@@ -477,7 +477,7 @@ def signup_student():
             )
         except Exception as e:
             print(e)
-            return render_template('signup_student.html', info="Error creating student account.")
+            return redirect(url_for('signup_student.html', info="Error creating student account."))
         # try:
         #     q = "INSERT INTO shp2156.Student_Attends (student_id, email, name, program_option, total_points, year, school_name, password) VALUES (:student_id, :email, :name, :program_option, :total_points, :year, :school_name, :password);"
         #     g.conn.execute(q, dict(student_id=student_id, email=email, name=name, program_option=program_option, total_points=0, year=year, school_name=school_name, password=password1))
