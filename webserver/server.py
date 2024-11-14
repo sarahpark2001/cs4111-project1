@@ -283,7 +283,15 @@ def manage_student_modify():
         return "Student not found", 404
 
     if request.method == 'GET':
-        return render_template('manage_student_modify.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions)
+        return render_template(
+            'student_form.html',
+            page_title="Modify Student Information",
+            form_action=url_for('manage_student_modify', student_id=student_id),
+            student=student,
+            schools=schools,
+            departments=departments,
+            dept_divisions=dept_divisions
+        )
 
     # Handle form submission
     name = request.form.get('name')
@@ -369,8 +377,17 @@ def edit_student():
     if not student:
         return "Student not found", 404
 
+        # Handle GET request to display the form
     if request.method == 'GET':
-        return render_template('edit_student.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions)
+        return render_template(
+            'student_form.html',
+            page_title="Edit Your Information",
+            form_action=url_for('edit_student'),
+            student=student,
+            schools=schools,
+            departments=departments,
+            dept_divisions=dept_divisions
+        )
 
     # Handle form submission
     name = request.form.get('name')
