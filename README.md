@@ -19,18 +19,18 @@ Our web server enables event planning interactions for the NYC NROTC group. User
 ## Endpoints
 - **/login** - Login page for both students and staff. Can choose which user type to login as. Contains links to signup pages.
 - **/logout** - Logs out the user. Redirects to login page.
-- **/signup** - Redirects to signup pages for students or staff based on form submission from \login page.
+- **/signup** - Redirects to signup pages for students or staff based on form submission from `/login` page.
 - **/signup_student** - Form to add new student to Student_Attends table as well as add them to the appropriate division & department in the `belongs` table.
 - **/signup_staff** - Form to add new staff to Staffs table.
-- **/student_dashboard** - Dashboard for students to see the directory, view events, RSVP, and track points.
-- **/staff_dashboard** - Dashboard for staff to see the directory as well as view and approve/reject events.
+- **/student_dashboard** - Dashboard for students to see the directory, view events, RSVP, edit their info, track points and logout.
+- **/staff_dashboard** - Dashboard for staff to see the directory, view all events, approve/reject pending events, edit their own info, manage students' info, and logout. 
 - **/create_event** - Enables students to create new events (pending approval by staff).
 - **/view_events** - Staff page for approving/rejecting student-created events.
-- **/invite** - Students who created the event can send invitations to approved events.
-- **/all_events** - Staff view history of all approved events, including participants.
-- **/rsvp** - Students can accept or decline invitations to approved events and sign up for all other approved events.
+- **/invite** - Students who have created an event can send invitations once event has been approved.
+- **/all_events** - Staff can view history of all approved events, including participants.
+- **/rsvp** - Students can view invitations to approved events and sign up for all other approved events.
 - **/edit_student** - Students can edit the data attached to their student_id in the `student_attends` and `belongs` tables.
-- **/edit_staff** - Staff can edit the data attached to their staff_id in the Staffs table.
+- **/edit_staff** - Staff can edit the data attached to their staff_id in the `staffs` table.
 - **/manage_student** - Staff can look up a student by student_id to manage that student's record, with options to modify or delete the student.
 - **/manage_student_action** - Handles the action selected in `/manage_student` (either modify or delete), and routes the user accordingly.
 - **/manage_student_modify** - Allows staff to modify student information, similar to `/edit_student` but with administrative permissions.
