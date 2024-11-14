@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirm Delete Student</title>
+</head>
+<body>
+    <h1>Confirm Delete Student</h1>
+
+    <p>You are about to delete the student: {{ student.name }} (ID: {{ student_id }})</p>
+    <p>Are you sure? This action is not reversible.</p>
+
+    <form method="POST" action="{{ url_for('confirm_delete_student', student_id=student_id) }}">
+        <button type="submit" name="confirm" value="yes">Yes, delete</button>
+        <button type="submit" name="confirm" value="no">Cancel</button>
+    </form>
+</body>
+</html>
