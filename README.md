@@ -17,10 +17,10 @@ Our web server enables event planning interactions for the NYC NROTC group. User
 - **server.py** - Main server file with all route definitions and database interactions.
 
 ## Endpoints
-- **/login** - Login page for both students and staff. Can choose which user type to login as.
-- **/logout** - Logs out the user.
-- **/signup** - Redirects to signup pages for students or staff.
-- **/signup_student** - Form to add new student to Student_Attends table.
+- **/login** - Login page for both students and staff. Can choose which user type to login as. Contains links to signup pages.
+- **/logout** - Logs out the user. Redirects to login page.
+- **/signup** - Redirects to signup pages for students or staff based on form submission from \login page.
+- **/signup_student** - Form to add new student to Student_Attends table as well as add them to the appropriate division & department in the `belongs` table.
 - **/signup_staff** - Form to add new staff to Staffs table.
 - **/student_dashboard** - Dashboard for students to see the directory, view events, RSVP, and track points.
 - **/staff_dashboard** - Dashboard for staff to see the directory as well as view and approve/reject events.
@@ -29,6 +29,8 @@ Our web server enables event planning interactions for the NYC NROTC group. User
 - **/invite** - Students who created the event can send invitations to approved events.
 - **/all_events** - Staff view history of all approved events, including participants.
 - **/rsvp** - Students can accept or decline invitations to approved events and sign up for all other approved events.
+- **/edit_student** - Students can edit the data attached to their student_id in the `student_attends` and `belongs` tables.
+- **/edit_staff** - Staff can edit the data attached to their staff_id in the Staffs table. 
 
 ## Changes from Earlier Stages & Explanations
 In our Part 1 Proposal, we briefly mentioned a functionality where students could edit the account details of other students. This doesn't make sense with how we implemented the app and our app's use-case. We used unique logins so that everyone is accessing only their own accounts and using those accounts to create events, signup for events, and invite others to events. This functionality was not in our ER diagram or schema (it was something we had considered for our app implementation), so we did not have to make any changes in order to exclude implementation.
