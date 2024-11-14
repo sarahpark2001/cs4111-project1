@@ -751,7 +751,8 @@ def invite():
                     (student_id, event_id, event['staff_id'], division, department, event['event_title'])
                 )
                 
-                invited_events.append(event['event_title'])  #to build message
+                if event['event_title'] not in invited_events:
+                    invited_events.append(event['event_title'])  #to build message
 
         # Prepare the message to pass to the staff dashboard
         info_message = ""
