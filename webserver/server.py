@@ -91,6 +91,59 @@ def teardown_request(exception):
 def index():
    return render_template('login.html')
 
+@app.route('/manage_student', methods=['GET', 'POST'])
+def manage_student():
+    if 'user_id' not in session or session.get('user_type') != 'staff':
+        return redirect('/login')
+
+    if request.method == 'POST':
+        student_id = request.form.get('student_id')
+        
+        # Retrieve the student details from the database
+        student = g.conn.execute(
+            "SELECT student_id, name FROM shp2156.Student_Attends WHERE student_id = %s",
+            (student_id,)
+        ).fetchone()
+
+        # If student is found, prompt staff for modify/delete options
+        if student:
+            return render_template('manage_student_confirm.html', student=student)
+        else:
+            # If no student is found, display an error message
+            return render_template('manage_student.html', info="No student found with that ID.")
+
+    return render_template('manage_student.html')
+
+@app.route('/manage_student_action', methods=['POST'])
+def manage_student_action():
+    if 'user_id' not in session or session.get('user_type') != 'staff':
+        return redirect('/login')
+    
+    student_id = request.form.get('student_id')
+    action = request.form.get('action')
+    
+    if action == 'modify':
+        # Redirect to the edit_student page with the student's ID
+        return redirect(url_for('edit_student', student_id=student_id))
+    
+    elif action == 'delete':
+        confirm = request.form.get('confirm')
+        
+        if confirm == 'yes':
+            # Perform deletion of the student record
+            g.conn.execute("DELETE FROM shp2156.belongs WHERE student_id = %s", (student_id,))
+            g.conn.execute("DELETE FROM shp2156.Student_Attends WHERE student_id = %s", (student_id,))
+            info_message = f"Student with ID {student_id} has been permanently deleted."
+            return redirect(url_for('staff_dashboard', info=info_message))
+        else:
+            # Redirect back to manage student if deletion not confirmed
+            student = g.conn.execute(
+                "SELECT student_id, name FROM shp2156.Student_Attends WHERE student_id = %s",
+                (student_id,)
+            ).fetchone()
+            return render_template('manage_student_confirm.html', student=student, info="Deletion canceled.")
+
+
 @app.route('/directory')
 def directory():
     if 'user_id' not in session:
