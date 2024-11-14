@@ -44,7 +44,7 @@
                 <td>{{ dept.dept_name }}</td>
                 <td>
                     <ul>
-                        {% for division in dept_div[dept.name] %}
+                        {% for division in dept_div[dept.dept_name] %}
                         <li>{{ division.div_name }}</li>
                         {% endfor %}
                     </ul>
