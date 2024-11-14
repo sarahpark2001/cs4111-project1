@@ -3,49 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Student Information</title>
+    <title>{{ page_title }}</title>
     <style>
-        /* Simple styling for better readability */
-        label {
-            display: block;
-            margin-top: 10px;
-        }
-        input, select, button {
-            margin-top: 5px;
-            padding: 5px;
-            width: 100%;
-            max-width: 400px;
-        }
-        .form-container {
-            max-width: 600px;
-            margin: auto;
-            padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-        }
-        .alert-info {
-            color: green;
-            font-weight: bold;
-        }
+        body { font-family: Arial, sans-serif; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        label { display: block; margin-top: 10px; font-weight: bold; }
+        input, select, button { width: 100%; padding: 8px; margin-top: 5px; }
+        .alert-info { color: red; font-weight: bold; }
     </style>
 </head>
 <body>
-    <div class="form-container">
-        <h1>Edit Your Information</h1>
+    <div class="container">
+        <h1>{{ page_title }}</h1>
 
         {% if info %}
             <div class="alert-info">{{ info }}</div>
         {% endif %}
 
-        <form method="POST" action="/edit_student">
-            <!-- Prepopulate fields with existing data for the user to edit -->
+        <form method="POST" action="{{ form_action }}">
             <label for="name">Name:</label>
             <input type="text" id="name" name="name" value="{{ student.name }}" required pattern="^[A-Za-z\s'-]{2,50}$">
 
             <label for="email">Email:</label>
             <input type="email" id="email" name="email" value="{{ student.email }}" required>
 
-            <label for="password1">New Password:</label>
+            <label for="password1">New Password (optional):</label>
             <input type="password" id="password1" name="password1" placeholder="Enter new password">
 
             <label for="password2">Confirm New Password:</label>
@@ -72,8 +54,6 @@
                 {% endfor %}
             </select>
 
-            </select>
-
             <label for="program_option">Program Option:</label>
             <select name="program_option" required>
                 <option value="SSO" {% if student.program_option == "SSO" %}selected{% endif %}>SSO</option>
@@ -87,7 +67,7 @@
             <label for="year">Year:</label>
             <input type="number" id="year" name="year" value="{{ student.year }}" min="1" max="6" required>
 
-            <button type="submit">Update Information</button>
+            <button type="submit">Update Student Information</button>
         </form>
     </div>
 
@@ -98,11 +78,10 @@
             const deptSelect = document.getElementById("dept_name");
             const divSelect = document.getElementById("div_name");
             const selectedDept = deptSelect.value;
-            
-            // Clear existing options
-            divSelect.innerHTML = "";
-            
-            // Add options for the selected department
+
+            divSelect.innerHTML = "";  // Clear existing options
+
+            // Populate options based on selected department
             if (deptDivisions[selectedDept]) {
                 deptDivisions[selectedDept].forEach(div => {
                     const option = document.createElement("option");
