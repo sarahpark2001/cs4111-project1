@@ -119,9 +119,11 @@ def manage_student_action():
     if 'user_id' not in session or session.get('user_type') != 'staff':
         return redirect('/login')
 
+    # Debugging output
     student_id = request.form.get('student_id')
     action = request.form.get('action')
     confirm = request.form.get('confirm')
+    print(f"manage_student_action - student_id: {student_id}, action: {action}, confirm: {confirm}")
 
     # Ensure student_id is provided and valid
     if not student_id:
@@ -139,6 +141,22 @@ def manage_student_action():
         if not student:
             return redirect(url_for('staff_dashboard', info="Student not found."))
         return render_template('manage_student_confirm.html', student=student, student_id=student_id, action='delete')
+
+    elif action == 'confirm_delete' and confirm == 'yes':
+        # Confirm and proceed with deletion
+        try:
+            g.conn.execute("DELETE FROM shp2156.Student_Attends WHERE student_id = %s", (student_id,))
+            g.conn.execute("DELETE FROM shp2156.belongs WHERE student_id = %s", (student_id,))
+            return redirect(url_for('staff_dashboard', info=f"Student ID {student_id} has been deleted successfully."))
+        except Exception as e:
+            print("Error deleting student:", e)
+            return redirect(url_for('staff_dashboard', info="An error occurred while trying to delete the student."))
+
+    elif action == 'confirm_delete' and confirm == 'no':
+        # Cancel the deletion and return to staff dashboard
+        return redirect(url_for('staff_dashboard', info="Deletion canceled."))
+
+    return redirect(url_for('staff_dashboard'))
 
     elif action == 'confirm_delete' and confirm == 'yes':
         # Confirm and proceed with deletion
