@@ -19,6 +19,7 @@ import os
 from sqlalchemy import *
 from sqlalchemy.pool import NullPool
 from flask import Flask, request, render_template, g, redirect, session, Response, url_for
+from datetime import datetime
 import secrets
 import re
 
@@ -534,6 +535,17 @@ def signup_staff():
 
         if name == '' or email == '' or password1 == '' or password2 == '' or phone_number == '' or pay_grade == '' or component == '' or job_title == '':
             return render_template('signup_staff.html', info="All fields are required.")
+        
+        # Validate name
+        if not name or not re.match(r"^[A-Za-z\s'-]{2,50}$", name):
+            message = "Name must be 2-50 characters and contain only letters, spaces, apostrophes, or hyphens."
+            return redirect(url_for('signup_student', info=message))
+
+        # Validate email
+        email_regex = r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)"
+        if not email or not re.match(email_regex, email):
+            message = "Please enter a valid email address."
+            return redirect(url_for('signup_student', info=message))
 
         # Check if passwords match
         if password1 != password2:
@@ -602,6 +614,14 @@ def create_event():
 
         if title == '' or location == '' or date == '' or event_start == '' or event_end == '' or max_capacity == '' or points == '':
             return render_template('create_event.html', info="All fields are required.")
+
+        # Check if event date is in the future
+        if date < str(datetime.date.today()):
+            return render_template('create_event.html', info="Event date must be in the future.")
+        
+        # Check if event start is before event end
+        if event_start >= event_end:
+            return render_template('create_event.html', info="Event start time must be before event end time.")
 
         # Insert new staff record
         try:
