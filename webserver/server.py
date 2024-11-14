@@ -1105,6 +1105,38 @@ def all_events():
 
     return render_template('all_events.html', events=events, participants=participants)
 
+@app.route('/school_dept_info_student')
+def school_dept_info():
+    if 'user_id' not in session:
+        return redirect('/login')
+
+    school_query = """
+        SELECT school_name, address
+        FROM shp2156.schools
+        ORDER BY school_name
+    """
+    schools = g.conn.execute(school_query).fetchall()
+    
+    dept_query = """
+        SELECT dept_name
+        FROM shp2156.departments
+        ORDER BY dept_name
+    """
+    departments = g.conn.execute(dept_query).fetchall()
+
+    dept_div = {}
+    for dept in departments:
+        dept_name = dept['dept_name']
+        div_query = """
+            SELECT div_name
+            FROM shp2156.division_belongs
+            WHERE dept_name = %s
+            ORDER BY div_name
+        """
+        dept_div[dept_name] = g.conn.execute(div_query, (dept_name,)).fetchall()
+
+    return render_template('school_dept_info.html', schools=schools, departments=departments, dept_div=dept_div)
+
 
 if __name__ == "__main__":
   import click

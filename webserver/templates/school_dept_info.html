@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Schools, Departments, Divisions</title>
+    <style>
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <h1>Directory</h1>
+
+    <h2>Schools</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Address</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for school in schools %}
+            <tr>
+                <td>{{ school.name }}</td>
+                <td>{{ school.address }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>Departments and Divisions</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Department</th>
+                <th>Divisions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for dept in depts %}
+            <tr>
+                <td>{{ dept.name }}</td>
+                <td>
+                    <ul>
+                        {% for div in depts[dept.name] %}
+                        <li>{{ div.name }}</li>
+                        {% endfor %}
+                    </ul>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
