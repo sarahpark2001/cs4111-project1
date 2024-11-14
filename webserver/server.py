@@ -134,7 +134,7 @@ def manage_student_action():
         ).fetchone()
         if not student:
             return "Student not found", 404
-        return render_template('confirm_manage_student.html', student=student, student_id=student_id, action='delete')
+        return render_template('manage_student_confirm.html', student=student, student_id=student_id, action='delete')
 
     elif action == 'confirm_delete' and confirm == 'yes':
         # Confirm and proceed with deletion
