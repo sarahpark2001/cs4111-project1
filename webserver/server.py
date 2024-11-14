@@ -377,35 +377,31 @@ def edit_student():
 
     student_id = session['user_id']  # Only allow the logged-in student's ID
 
-    # Fetch school, department, and division data for form
-    cursor = g.conn.execute("SELECT school_name FROM schools")
-    schools = cursor.fetchall()
-
-    cursor = g.conn.execute("SELECT dept_name FROM departments")
-    departments = cursor.fetchall()
-
-    cursor = g.conn.execute("SELECT div_name, dept_name FROM division_belongs")
-    divisions = cursor.fetchall()
-
-    dept_divisions = {}
-    for division, department in divisions:
-        if department not in dept_divisions:
-            dept_divisions[department] = []
-        dept_divisions[department].append(division)
-
-    # Fetch existing student data for form
-    student = g.conn.execute(
-        "SELECT name, email, program_option, year, school_name, div_name, dept_name "
-        "FROM shp2156.Student_Attends sa JOIN shp2156.belongs b "
-        "ON sa.student_id = b.student_id WHERE sa.student_id = %s",
-        (student_id,)
-    ).fetchone()
-
-    if not student:
-        return "Student not found", 404
-
-        # Handle GET request to display the form
     if request.method == 'GET':
+        # Fetch school, department, and division data for form
+        cursor = g.conn.execute("SELECT school_name FROM schools")
+        schools = cursor.fetchall()
+
+        cursor = g.conn.execute("SELECT dept_name FROM departments")
+        departments = cursor.fetchall()
+
+        cursor = g.conn.execute("SELECT div_name, dept_name FROM division_belongs")
+        divisions = cursor.fetchall()
+
+        dept_divisions = {}
+        for division, department in divisions:
+            if department not in dept_divisions:
+                dept_divisions[department] = []
+            dept_divisions[department].append(division)
+
+        # Fetch existing student data for form
+        student = g.conn.execute(
+            "SELECT name, email, program_option, year, school_name, div_name, dept_name "
+            "FROM shp2156.Student_Attends sa JOIN shp2156.belongs b "
+            "ON sa.student_id = b.student_id WHERE sa.student_id = %s",
+            (student_id,)
+        ).fetchone()
+
         return render_template(
             'student_form.html',
             page_title="Edit Your Information",
@@ -416,54 +412,72 @@ def edit_student():
             dept_divisions=dept_divisions
         )
 
-    # Handle form submission
-    name = request.form.get('name')
-    email = request.form.get('email')
-    password1 = request.form.get('password1')
-    password2 = request.form.get('password2')
-    school_name = request.form.get('school_name')
-    dept_name = request.form.get('dept_name')
-    div_name = request.form.get('div_name')
-    program_option = request.form.get('program_option')
-    year = request.form.get('year')
+    if request.method == 'POST':
+        # Handle form submission
+        name = request.form.get('name')
+        email = request.form.get('email')
+        password1 = request.form.get('password1')
+        password2 = request.form.get('password2')
+        school_name = request.form.get('school_name')
+        dept_name = request.form.get('dept_name')
+        div_name = request.form.get('div_name')
+        program_option = request.form.get('program_option')
+        year = request.form.get('year')
 
-    # Validate and update
-    if email != student.email:  # Only check if email was changed
-        duplicate_email = g.conn.execute(
-            "SELECT student_id FROM shp2156.Student_Attends WHERE email = %s AND student_id != %s",
-            (email, student_id)
+        # Fetch existing student data for form
+        student = g.conn.execute(
+            "SELECT name, email, program_option, year, school_name, div_name, dept_name "
+            "FROM shp2156.Student_Attends sa JOIN shp2156.belongs b "
+            "ON sa.student_id = b.student_id WHERE sa.student_id = %s",
+            (student_id,)
         ).fetchone()
 
-        if duplicate_email:
-            return render_template('edit_student.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions, info="This email is already in use by another student.")
+        if not name or not re.match(r"^[A-Za-z\s'-]{2,50}$", name):
+            message = "Name must be 2-50 characters and contain only letters, spaces, apostrophes, or hyphens."
+            return redirect(url_for('edit_student', info=message))
+        
+        email_regex = r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)"
+        if not email or not re.match(email_regex, email):
+            message = "Please enter a valid email address."
+            return redirect(url_for('edit_student', info=message))
 
-    if password1 != password2:
-        return render_template('edit_student.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions, info="Passwords do not match.")
+        # Validate and update
+        if email != student.email:
+            duplicate_email = g.conn.execute(
+                "SELECT student_id FROM shp2156.Student_Attends WHERE email = %s AND student_id != %s",
+                (email, student_id)
+            ).fetchone()
 
-    try:
-        # Update student data
-        if password1:
+            if duplicate_email:
+                return render_template('edit_student.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions, info="This email is already in use by another student.")
+
+        if password1 != password2:
+            return render_template('edit_student.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions, info="Passwords do not match.")
+    
+        try:
+            # Update student data
+            if password1:
+                g.conn.execute(
+                    "UPDATE shp2156.Student_Attends SET name = %s, email = %s, program_option = %s, year = %s, school_name = %s, password = %s WHERE student_id = %s",
+                    (name, email, program_option, year, school_name, password1, student_id)
+                )
+            else:
+                g.conn.execute(
+                    "UPDATE shp2156.Student_Attends SET name = %s, email = %s, program_option = %s, year = %s, school_name = %s WHERE student_id = %s",
+                    (name, email, program_option, year, school_name, student_id)
+                )
+
+            # Update belongs
             g.conn.execute(
-                "UPDATE shp2156.Student_Attends SET name = %s, email = %s, program_option = %s, year = %s, school_name = %s, password = %s WHERE student_id = %s",
-                (name, email, program_option, year, school_name, password1, student_id)
-            )
-        else:
-            g.conn.execute(
-                "UPDATE shp2156.Student_Attends SET name = %s, email = %s, program_option = %s, year = %s, school_name = %s WHERE student_id = %s",
-                (name, email, program_option, year, school_name, student_id)
+                "UPDATE shp2156.belongs SET div_name = %s, dept_name = %s WHERE student_id = %s",
+                (div_name, dept_name, student_id)
             )
 
-        # Update belongs
-        g.conn.execute(
-            "UPDATE shp2156.belongs SET div_name = %s, dept_name = %s WHERE student_id = %s",
-            (div_name, dept_name, student_id)
-        )
+            return redirect(url_for('student_dashboard', info="Your information has been updated successfully."))
 
-        return redirect(url_for('student_dashboard', info="Your information has been updated successfully."))
-
-    except Exception as e:
-        print("Error updating student information:", e)
-        return render_template('edit_student.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions, info="An error occurred while updating your information.")
+        except Exception as e:
+            print("Error updating student information:", e)
+            return render_template('edit_student.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions, info="An error occurred while updating your information.")
 
 
 @app.route('/login', methods=['GET', 'POST'])
