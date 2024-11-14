@@ -138,71 +138,59 @@ def edit_staff():
 
     staff_id = session['user_id']
 
-    # Fetch existing staff data
-    staff = g.conn.execute(
-        "SELECT name, email, phone_number, pay_grade, component, job_title FROM shp2156.Staffs WHERE staff_id = %s",
-        (staff_id,)
-    ).fetchone()
-
-    # If GET, render form with existing data
+    # Fetch existing staff data for GET request
     if request.method == 'GET':
+        staff = g.conn.execute(
+            "SELECT name, email, phone_number, pay_grade, component, job_title FROM shp2156.Staffs WHERE staff_id = %s",
+            (staff_id,)
+        ).fetchone()
+
         return render_template('edit_staff.html', staff=staff)
 
-    # If POST, process the form submission
-    name = request.form.get('name', staff['name'])
-    email = request.form.get('email', staff['email'])
-    password1 = request.form.get('password1', None)
-    password2 = request.form.get('password2', None)
-    phone_number = request.form.get('phone_number', staff['phone_number'])
-    pay_grade = request.form.get('pay_grade', staff['pay_grade'])
-    component = request.form.get('component', staff['component'])
-    job_title = request.form.get('job_title', staff['job_title'])
+    # Process form submission on POST request
+    if request.method == 'POST':
+        # Retrieve form data
+        name = request.form.get('name')
+        email = request.form.get('email')
+        phone_number = request.form.get('phone_number')
+        job_title = request.form.get('job_title')
+        component = request.form.get('component')
+        pay_grade = request.form.get('pay_grade')
+        password1 = request.form.get('password1')
+        password2 = request.form.get('password2')
 
-    # Validate name
-    if name and not re.match(r"^[A-Za-z\s'-]{2,50}$", name):
-        return redirect(url_for('edit_staff', info="Name must be 2-50 characters and contain only letters, spaces, apostrophes, or hyphens."))
+        # Validation: Ensure passwords match if provided
+        if password1 and password1 != password2:
+            info_message = "Passwords do not match."
+            return render_template('edit_staff.html', staff=staff, info=info_message)
 
-    # Validate email
-    email_regex = r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)"
-    if email and not re.match(email_regex, email):
-        return redirect(url_for('edit_staff', info="Please enter a valid email address."))
+        # Construct SQL query based on whether the password needs to be updated
+        if password1:  # If a new password is provided
+            update_query = """
+                UPDATE shp2156.Staffs
+                SET name = %s, email = %s, phone_number = %s,
+                    pay_grade = %s, component = %s, job_title = %s, password = %s
+                WHERE staff_id = %s
+            """
+            update_data = (name, email, phone_number, pay_grade, component, job_title, password1, staff_id)
+        else:  # If no password update is needed
+            update_query = """
+                UPDATE shp2156.Staffs
+                SET name = %s, email = %s, phone_number = %s,
+                    pay_grade = %s, component = %s, job_title = %s
+                WHERE staff_id = %s
+            """
+            update_data = (name, email, phone_number, pay_grade, component, job_title, staff_id)
 
-    # Validate phone number format ###-###-####
-    phone_regex = r"^\d{3}-\d{3}-\d{4}$"
-    if phone_number and not re.match(phone_regex, phone_number):
-        return redirect(url_for('edit_staff', info="Phone number must be in the format ###-###-####."))
-
-    # Check if passwords match if entered
-    if password1 or password2:
-        if password1 != password2:
-            return redirect(url_for('edit_staff', info="Passwords do not match."))
-
-    # Update only changed fields
-    update_data = {
-        "name": name,
-        "email": email,
-        "phone_number": phone_number,
-        "pay_grade": pay_grade,
-        "component": component,
-        "job_title": job_title
-    }
-
-    if password1:
-        update_data["password"] = password1
-
-    update_query = """
-        UPDATE shp2156.Staffs
-        SET name = %(name)s, email = %(email)s, phone_number = %(phone_number)s,
-            pay_grade = %(pay_grade)s, component = %(component)s, job_title = %(job_title)s
-    """
-    if password1:
-        update_query += ", password = %(password)s"
-    update_query += " WHERE staff_id = %s"
-
-    g.conn.execute(update_query, {**update_data, "staff_id": staff_id})
-
-    info_message = "Your information has been updated successfully."
-    return redirect(url_for('staff_dashboard', info=info_message))
+        # Execute the query with positional placeholders
+        try:
+            g.conn.execute(update_query, update_data)
+            info_message = "Your information has been updated successfully."
+            return redirect(url_for('staff_dashboard', info=info_message))
+        
+        except Exception as e:
+            print("Error updating staff information:", e)
+            return render_template('edit_staff.html', staff=staff, info="An error occurred while updating your information.")
 
 
 @app.route('/edit_student', methods=['GET', 'POST'])
