@@ -239,6 +239,23 @@ def edit_staff():
         password1 = request.form.get('password1')
         password2 = request.form.get('password2')
 
+        # Validation: Ensure name is provided and valid
+        if not name or not re.match(r"^[A-Za-z\s'-]{2,50}$", name):
+            message = "Name must be 2-50 characters and contain only letters, spaces, apostrophes, or hyphens."
+            return render_template('edit_staff.html', staff=staff, info=message)
+
+        # Validate email
+        email_regex = r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)"
+        if not email or not re.match(email_regex, email):
+            message = "Please enter a valid email address."
+            return render_template('edit_staff.html', staff=staff, info=message)
+        
+        # Validate phone number.
+        phone_regex = r"^\d{3}-\d{3}-\d{4}$"
+        if not re.match(phone_regex, phone_number):
+            message = "Phone number must be in the format ###-###-####."
+            return render_template('edit_staff.html', staff=staff, info=message)
+
         # Validation: Ensure passwords match if provided
         if password1 and password1 != password2:
             info_message = "Passwords do not match."
