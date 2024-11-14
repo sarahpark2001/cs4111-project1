@@ -377,7 +377,7 @@ def signup_student():
         year = request.form['year']
 
         if name == '' or email == '' or password1 == '' or password2 == '' or school_name == '' or dept_name == '' or div_name == '' or program_option == '' or year == '':
-            return redirect(url_for('signup_student.html', info="All fields are required."))
+            return redirect(url_for('signup_student', info="All fields are required."))
 
         # Validate name
         if not name or not re.match(r"^[A-Za-z\s'-]{2,50}$", name):
@@ -417,7 +417,7 @@ def signup_student():
             dept_divisions[department].append(division)
 
         if dept_name not in dept_divisions or div_name not in dept_divisions[dept_name]:
-            return redirect(url_for('signup_student.html', info="Invalid division for the selected department."))
+            return redirect(url_for('signup_student', info="Invalid division for the selected department."))
 
         try:
             g.conn.execute(
@@ -427,7 +427,7 @@ def signup_student():
             )
         except Exception as e:
             print(e)
-            return redirect(url_for('signup_student.html', info="Error creating student account."))
+            return redirect(url_for('signup_student', info="Error creating student account."))
         try:
             g.conn.execute(
                 "INSERT INTO shp2156.belongs (student_id, div_name, dept_name) "
@@ -436,7 +436,7 @@ def signup_student():
             )
         except Exception as e:
             print(e)
-            return redirect(url_for('signup_student.html', info="Error creating student account."))
+            return redirect(url_for('signup_student', info="Error creating student account."))
 
         # Successful registration message
         message = f"You have been assigned User ID {student_id}. Please save your User ID and password for future logins."
@@ -552,7 +552,7 @@ def create_event():
         points = request.form['points']
 
         if title == '' or location == '' or date == '' or event_start == '' or event_end == '' or max_capacity == '' or points == '':
-            return redirect(url_for('create_event.html', info="All fields are required."))
+            return redirect(url_for('create_event', info="All fields are required."))
 
         event_date = datetime.strptime(date, '%Y-%m-%d').date()
         # Check if event date is in the future
@@ -574,7 +574,7 @@ def create_event():
             )
         except Exception as e:
             print(e)
-            return redirect(url_for('create_event.html', info="Error creating event."))
+            return redirect(url_for('create_event', info="Error creating event."))
 
         # Redirect to login with info message
         try:
