@@ -4,30 +4,39 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Confirm Manage Student</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .button { padding: 10px 20px; font-size: 16px; margin: 5px; cursor: pointer; }
+        .modify { background-color: blue; color: white; }
+        .delete { background-color: red; color: white; }
+        .confirm { background-color: red; color: white; }
+        .cancel { background-color: gray; color: white; }
+    </style>
 </head>
 <body>
     <h1>Manage Student</h1>
 
     <p>You selected student: {{ student.name }} (ID: {{ student.student_id }})</p>
 
-    <form method="POST" action="/manage_student_action">
-        <input type="hidden" name="student_id" value="{{ student.student_id }}">
+    {% if not action %}
+        <form method="POST" action="/manage_student_action">
+            <input type="hidden" name="student_id" value="{{ student.student_id }}">
 
-        <button type="submit" name="action" value="modify">Modify</button>
-        <button type="submit" name="action" value="delete">Delete</button>
-    </form>
+            <button type="submit" name="action" value="modify" class="button modify">Modify</button>
+            <button type="submit" name="action" value="delete" class="button delete">Delete</button>
+        </form>
+    {% elif action == 'delete' %}
+        <form method="POST" action="/manage_student_action">
+            <input type="hidden" name="student_id" value="{{ student.student_id }}">
+            <input type="hidden" name="action" value="confirm_delete">
+            <p>Are you sure? This action is not reversible.</p>
+            <button type="submit" name="confirm" value="yes" class="button confirm">Yes, delete</button>
+            <button type="submit" name="confirm" value="no" class="button cancel">Cancel</button>
+        </form>
+    {% endif %}
 
     {% if info %}
         <div class="alert-info">{{ info }}</div>
-    {% endif %}
-
-    {% if action == 'delete' %}
-        <form method="POST" action="/manage_student_action">
-            <input type="hidden" name="student_id" value="{{ student.student_id }}">
-            <p>Are you sure? This action is not reversible.</p>
-            <button type="submit" name="confirm" value="yes">Yes, delete</button>
-            <button type="submit" name="confirm" value="no">Cancel</button>
-        </form>
     {% endif %}
 </body>
 </html>
