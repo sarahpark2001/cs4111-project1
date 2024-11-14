@@ -556,7 +556,7 @@ def create_event():
 
         event_date = datetime.strptime(date, '%Y-%m-%d').date()
         # Check if event date is in the future
-        if event_date < datetime.now().date():
+        if event_date <= datetime.now().date():
             return redirect(url_for('create_event', info="Event date must be in the future."))
         
         event_start_time = datetime.strptime(event_start, '%H:%M').time()
