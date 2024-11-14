@@ -124,7 +124,7 @@ def manage_student_action():
     
     if action == 'modify':
         # Redirect to the edit_student page with the student's ID
-        return redirect(url_for('edit_student', student_id=student_id))
+        return redirect(url_for('manage_student_modify', student_id=student_id))
     
     elif action == 'delete':
         confirm = request.form.get('confirm')
@@ -136,12 +136,12 @@ def manage_student_action():
             info_message = f"Student with ID {student_id} has been permanently deleted."
             return redirect(url_for('staff_dashboard', info=info_message))
         else:
-            # Redirect back to manage student if deletion not confirmed
+            # Redirect back to staff dashboard if deletion not confirmed
             student = g.conn.execute(
                 "SELECT student_id, name FROM shp2156.Student_Attends WHERE student_id = %s",
                 (student_id,)
             ).fetchone()
-            return render_template('manage_student_confirm.html', student=student, info="Deletion canceled.")
+            return render_template('staff_dashboard.html', student=student, info="Deletion canceled.")
 
 
 @app.route('/directory')
