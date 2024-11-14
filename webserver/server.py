@@ -56,6 +56,10 @@ ranks = {
     }
 }
 
+@app.context_processor
+def inject_ranks():
+    return dict(ranks=ranks)
+
 @app.before_request
 def before_request():
   """
