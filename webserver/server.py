@@ -140,20 +140,21 @@ def login():
             return render_template('login.html', info='Please enter valid credentials.')
         
         if user_type == 'student':
-            # cursor = g.conn.execute(
-            #     "SELECT name FROM shp2156.Student_Attends WHERE student_id = %s AND password = %s",
-            #     (user_id, password)
-            # )
-            # user = cursor.fetchone()
-            # cursor.close()
             try:
-                q = "SELECT name FROM shp2156.Student_Attends WHERE student_id = :student_id AND password = :password;"
-                cursor = g.conn.execute(q, dict(student_id=user_id, password=password))
+                cursor = g.conn.execute(
+                    "SELECT name FROM shp2156.Student_Attends WHERE student_id = %s AND password = %s",
+                    (user_id, password)
+                )
                 user = cursor.fetchone()
                 cursor.close()
             except Exception as e:
                 print(e)
                 user = None
+            # try:
+            #     q = "SELECT name FROM shp2156.Student_Attends WHERE student_id = :student_id AND password = :password;"
+            #     cursor = g.conn.execute(q, dict(student_id=user_id, password=password))
+            #     user = cursor.fetchone()
+            #     cursor.close()
             
             if user is None:
                 return render_template('login.html', info='Invalid Student ID or Password')
@@ -163,17 +164,18 @@ def login():
                 return redirect('/student_dashboard')
         
         elif user_type == 'staff':
-            # cursor = g.conn.execute(
-            #     "SELECT name FROM shp2156.Staffs WHERE staff_id = %s AND password = %s",
-            #     (user_id, password)
-            # )
-            # user = cursor.fetchone()
-            # cursor.close()
             try:
-                q = "SELECT name FROM shp2156.staffs WHERE staff_id = :staff_id AND password = :password;"
-                cursor = g.conn.execute(q, dict(staff_id=user_id, password=password))
+                cursor = g.conn.execute(
+                    "SELECT name FROM shp2156.Staffs WHERE staff_id = %s AND password = %s",
+                    (user_id, password)
+                )
                 user = cursor.fetchone()
                 cursor.close()
+            # try:
+            #     q = "SELECT name FROM shp2156.staffs WHERE staff_id = :staff_id AND password = :password;"
+            #     cursor = g.conn.execute(q, dict(staff_id=user_id, password=password))
+            #     user = cursor.fetchone()
+            #     cursor.close()
             except Exception as e:
                 print(e)
                 user = None
@@ -427,15 +429,16 @@ def signup_student():
         if dept_name not in dept_divisions or div_name not in dept_divisions[dept_name]:
             message = "Invalid division for the selected department."
             return redirect(url_for('signup_student', info=message))
-            
-        # cursor = g.conn.execute("SELECT * FROM shp2156.Student_Attends WHERE email = %s", (email,))
-        # existing_user = cursor.fetchone()
-        # cursor.close()
+        
         try:
-            q = "SELECT * FROM shp2156.Student_Attends WHERE email = :email;"
-            cursor = g.conn.execute(q, dict(email=email))
+            cursor = g.conn.execute("SELECT * FROM shp2156.Student_Attends WHERE email = %s", (email,))
             existing_user = cursor.fetchone()
             cursor.close()
+        # try:
+        #     q = "SELECT * FROM shp2156.Student_Attends WHERE email = :email;"
+        #     cursor = g.conn.execute(q, dict(email=email))
+        #     existing_user = cursor.fetchone()
+        #     cursor.close()
         except Exception as e:
             print(e)
             existing_user = None
@@ -456,28 +459,36 @@ def signup_student():
         if dept_name not in dept_divisions or div_name not in dept_divisions[dept_name]:
             return render_template('signup_student.html', info="Invalid division for the selected department.")
 
-        # g.conn.execute(
-        #     "INSERT INTO shp2156.Student_Attends (student_id, email, name, program_option, total_points, year, school_name, password) "
-        #     "VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
-        #     (student_id, email, name, program_option, 0, year, school_name, password1)
-        # )
-        # g.conn.execute(
-        #     "INSERT INTO shp2156.belongs (student_id, div_name, dept_name) "
-        #     "VALUES (%s, %s, %s)",
-        #     (student_id, div_name, dept_name)
-        # )
         try:
-            q = "INSERT INTO shp2156.Student_Attends (student_id, email, name, program_option, total_points, year, school_name, password) VALUES (:student_id, :email, :name, :program_option, :total_points, :year, :school_name, :password);"
-            g.conn.execute(q, dict(student_id=student_id, email=email, name=name, program_option=program_option, total_points=0, year=year, school_name=school_name, password=password1))
+            g.conn.execute(
+                "INSERT INTO shp2156.Student_Attends (student_id, email, name, program_option, total_points, year, school_name, password) "
+                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
+                (student_id, email, name, program_option, 0, year, school_name, password1)
+            )
         except Exception as e:
             print(e)
             return render_template('signup_student.html', info="Error creating student account.")
         try:
-            q = "INSERT INTO shp2156.belongs (student_id, div_name, dept_name) VALUES (:student_id, :div_name, :dept_name);"
-            g.conn.execute(q, dict(student_id=student_id, div_name=div_name, dept_name=dept_name))
+            g.conn.execute(
+                "INSERT INTO shp2156.belongs (student_id, div_name, dept_name) "
+                "VALUES (%s, %s, %s)",
+                (student_id, div_name, dept_name)
+            )
         except Exception as e:
             print(e)
             return render_template('signup_student.html', info="Error creating student account.")
+        # try:
+        #     q = "INSERT INTO shp2156.Student_Attends (student_id, email, name, program_option, total_points, year, school_name, password) VALUES (:student_id, :email, :name, :program_option, :total_points, :year, :school_name, :password);"
+        #     g.conn.execute(q, dict(student_id=student_id, email=email, name=name, program_option=program_option, total_points=0, year=year, school_name=school_name, password=password1))
+        # except Exception as e:
+        #     print(e)
+        #     return render_template('signup_student.html', info="Error creating student account.")
+        # try:
+        #     q = "INSERT INTO shp2156.belongs (student_id, div_name, dept_name) VALUES (:student_id, :div_name, :dept_name);"
+        #     g.conn.execute(q, dict(student_id=student_id, div_name=div_name, dept_name=dept_name))
+        # except Exception as e:
+        #     print(e)
+        #     return render_template('signup_student.html', info="Error creating student account.")
 
         # Successful registration message
         message = f"You have been assigned User ID {student_id}. Please save your User ID and password for future logins."
@@ -529,14 +540,15 @@ def signup_staff():
             return redirect(url_for('signup_staff', info="Passwords do not match."))
 
         # Check if email already exists
-        # cursor = g.conn.execute("SELECT * FROM shp2156.Staffs WHERE email = %s", (email,))
-        # existing_user = cursor.fetchone()
-        # cursor.close()
         try:
-            q = "SELECT * FROM shp2156.Staffs WHERE email = :email;"
-            cursor = g.conn.execute(q, dict(email=email))
+            cursor = g.conn.execute("SELECT * FROM shp2156.Staffs WHERE email = %s", (email,))
             existing_user = cursor.fetchone()
             cursor.close()
+        # try:
+        #     q = "SELECT * FROM shp2156.Staffs WHERE email = :email;"
+        #     cursor = g.conn.execute(q, dict(email=email))
+        #     existing_user = cursor.fetchone()
+        #     cursor.close()
         except Exception as e:
             print(e)
             existing_user = None
@@ -545,14 +557,15 @@ def signup_staff():
             return redirect(url_for('signup_staff', info="Email already exists."))
 
         # Insert new staff record
-        # g.conn.execute(
-        #     "INSERT INTO shp2156.Staffs (staff_id, name, email, password, phone_number, pay_grade, component, job_title) "
-        #     "VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
-        #     (staff_id, name, email, password1, phone_number, pay_grade, component, job_title)
-        # )
         try:
-            q = "INSERT INTO shp2156.Staffs (staff_id, name, email, password, phone_number, pay_grade, component, job_title) VALUES (:staff_id, :name, :email, :password, :phone_number, :pay_grade, :component, :job_title);"
-            g.conn.execute(q, dict(staff_id=staff_id, name=name, email=email, password=password1, phone_number=phone_number, pay_grade=pay_grade, component=component, job_title=job_title))
+            g.conn.execute(
+                "INSERT INTO shp2156.Staffs (staff_id, name, email, password, phone_number, pay_grade, component, job_title) "
+                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
+                (staff_id, name, email, password1, phone_number, pay_grade, component, job_title)
+            )
+        # try:
+        #     q = "INSERT INTO shp2156.Staffs (staff_id, name, email, password, phone_number, pay_grade, component, job_title) VALUES (:staff_id, :name, :email, :password, :phone_number, :pay_grade, :component, :job_title);"
+        #     g.conn.execute(q, dict(staff_id=staff_id, name=name, email=email, password=password1, phone_number=phone_number, pay_grade=pay_grade, component=component, job_title=job_title))
         except Exception as e:
             print(e)
             return render_template('signup_staff.html', info="Error creating staff account.")
@@ -591,26 +604,28 @@ def create_event():
             return render_template('create_event.html', info="All fields are required.")
 
         # Insert new staff record
-        # g.conn.execute(
-        #     "INSERT INTO shp2156.events_created (event_id, event_start, event_end, event_date, event_location, event_points, max_capacity, student_id, event_title) "
-        #     "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
-        #     (event_id, event_start, event_end, date, location, points, max_capacity, student_id, title)
-        # )
         try:
-            q = "INSERT INTO shp2156.events_created (event_id, event_start, event_end, event_date, event_location, event_points, max_capacity, student_id, event_title) VALUES (:event_id, :event_start, :event_end, :event_date, :event_location, :event_points, :max_capacity, :student_id, :event_title);"
-            g.conn.execute(q, dict(event_id=event_id, event_start=event_start, event_end=event_end, event_date=date, event_location=location, event_points=points, max_capacity=max_capacity, student_id=student_id, event_title=title))
+            g.conn.execute(
+                "INSERT INTO shp2156.events_created (event_id, event_start, event_end, event_date, event_location, event_points, max_capacity, student_id, event_title) "
+                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                (event_id, event_start, event_end, date, location, points, max_capacity, student_id, title)
+            )
+        # try:
+        #     q = "INSERT INTO shp2156.events_created (event_id, event_start, event_end, event_date, event_location, event_points, max_capacity, student_id, event_title) VALUES (:event_id, :event_start, :event_end, :event_date, :event_location, :event_points, :max_capacity, :student_id, :event_title);"
+        #     g.conn.execute(q, dict(event_id=event_id, event_start=event_start, event_end=event_end, event_date=date, event_location=location, event_points=points, max_capacity=max_capacity, student_id=student_id, event_title=title))
         except Exception as e:
             print(e)
             return render_template('create_event.html', info="Error creating event.")
 
         # Redirect to login with info message
-        # student = g.conn.execute(
-        #     "SELECT name, total_points, program_option FROM shp2156.Student_Attends WHERE student_id = %s",
-        #     (student_id,)
-        # ).fetchone()
         try:
-            q = "SELECT name, total_points, program_option FROM shp2156.Student_Attends WHERE student_id = :student_id;"
-            student = g.conn.execute(q, dict(student_id=student_id)).fetchone()
+            student = g.conn.execute(
+                "SELECT name, total_points, program_option FROM shp2156.Student_Attends WHERE student_id = %s",
+                (student_id,)
+            ).fetchone()
+        # try:
+        #     q = "SELECT name, total_points, program_option FROM shp2156.Student_Attends WHERE student_id = :student_id;"
+        #     student = g.conn.execute(q, dict(student_id=student_id)).fetchone()
         except Exception as e:
             print(e)
             student = None
