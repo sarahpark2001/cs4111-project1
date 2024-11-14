@@ -605,7 +605,7 @@ def create_event():
             return redirect(url_for('create_event.html', info="All fields are required."))
 
         try:
-            event_date = datetime.strptime(date, '%Y/%m/%d').date()
+            event_date = datetime.strptime(date, '%Y-%m-%d').date()
         except ValueError:
             return redirect(url_for('create_event', info="Invalid date format. Please use YYYY/MM/DD."))
 
