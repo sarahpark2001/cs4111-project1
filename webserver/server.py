@@ -482,6 +482,12 @@ def signup_staff():
 
         if name == '' or email == '' or password1 == '' or password2 == '' or phone_number == '' or pay_grade == '' or component == '' or job_title == '':
             return redirect(url_for('signup_staff', info="All fields are required."))
+
+        # Validate phone number.
+        phone_regex = r"^\d{3}-\d{3}-\d{4}$"
+        if not re.match(phone_regex, phone_number):
+            message = "Phone number must be in the format ###-###-####."
+            return redirect(url_for('signup_staff', info=message))
         
         # Validate name
         if not name or not re.match(r"^[A-Za-z\s'-]{2,50}$", name):
