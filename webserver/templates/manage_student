@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Student</title>
+</head>
+<body>
+    <h1>Manage Student</h1>
+
+    {% if info %}
+        <div class="alert-info">{{ info }}</div>
+    {% endif %}
+
+    <form method="POST" action="/manage_student">
+        <label for="student_id">Enter Student ID:</label>
+        <input type="text" id="student_id" name="student_id" required>
+        <button type="submit">Lookup Student</button>
+    </form>
+</body>
+</html>
