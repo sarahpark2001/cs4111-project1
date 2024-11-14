@@ -72,8 +72,17 @@
                 {% endfor %}
             </select>
 
+            </select>
+
             <label for="program_option">Program Option:</label>
-            <input type="text" id="program_option" name="program_option" value="{{ student.program_option }}" required>
+            <select name="program_option" required>
+                <option value="SSO" {% if student.program_option == "SSO" %}selected{% endif %}>SSO</option>
+                <option value="NPP" {% if student.program_option == "NPP" %}selected{% endif %}>NPP</option>
+                <option value="NAVY SCH" {% if student.program_option == "NAVY SCH" %}selected{% endif %}>NAVY SCH</option>
+                <option value="M SCH" {% if student.program_option == "M SCH" %}selected{% endif %}>M SCH</option>
+                <option value="STA-21" {% if student.program_option == "STA-21" %}selected{% endif %}>STA-21</option>
+                <option value="CP-N" {% if student.program_option == "CP-N" %}selected{% endif %}>CP-N</option>
+            </select>
 
             <label for="year">Year:</label>
             <input type="number" id="year" name="year" value="{{ student.year }}" min="1" max="6" required>
