@@ -208,16 +208,15 @@ def edit_student():
 
     student_id = session['user_id']
 
-    # Fetch existing student data
-    student = g.conn.execute(
-        "SELECT name, email, program_option, year, school_name, password, div_name, dept_name "
-        "FROM shp2156.Student_Attends sa JOIN shp2156.belongs b "
-        "ON sa.student_id = b.student_id WHERE sa.student_id = %s",
-        (student_id,)
-    ).fetchone()
-
-    # Prepopulate the form fields with current values
+    # Fetch existing student data for GET request
     if request.method == 'GET':
+        student = g.conn.execute(
+            "SELECT name, email, program_option, year, school_name, div_name, dept_name "
+            "FROM shp2156.Student_Attends sa JOIN shp2156.belongs b "
+            "ON sa.student_id = b.student_id WHERE sa.student_id = %s",
+            (student_id,)
+        ).fetchone()
+
         cursor = g.conn.execute("SELECT school_name FROM schools")
         schools = cursor.fetchall()
 
@@ -235,8 +234,9 @@ def edit_student():
 
         return render_template('edit_student.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions)
 
-    # Process form submission on POST
+    # Process form submission on POST request
     if request.method == 'POST':
+        # Retrieve form data
         name = request.form['name']
         email = request.form['email']
         password1 = request.form['password1']
@@ -247,34 +247,50 @@ def edit_student():
         program_option = request.form['program_option']
         year = request.form['year']
 
-        # Check for valid name and email format
+        # Validate name and email formats
         if not name or not re.match(r"^[A-Za-z\s'-]{2,50}$", name):
-            return render_template('edit_student.html', student=student, info="Invalid name format.")
+            info = "Invalid name format."
+            return render_template('edit_student.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions, info=info)
 
         email_regex = r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)"
         if not email or not re.match(email_regex, email):
-            return render_template('edit_student.html', student=student, info="Invalid email format.")
+            info = "Invalid email format."
+            return render_template('edit_student.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions, info=info)
         
-        # Check for password match
-        if password1 != password2:
-            return render_template('edit_student.html', student=student, info="Passwords do not match.")
-        
+        # Check if passwords match
+        if password1 or password2:
+            if password1 != password2:
+                info = "Passwords do not match."
+                return render_template('edit_student.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions, info=info)
+
         # Ensure the department and division are valid
         if dept_name not in dept_divisions or div_name not in dept_divisions[dept_name]:
-            return render_template('edit_student.html', student=student, info="Invalid division for the selected department.")
+            info = "Invalid division for the selected department."
+            return render_template('edit_student.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions, info=info)
         
-        # Update student information
-        g.conn.execute(
-            "UPDATE shp2156.Student_Attends SET name = %s, email = %s, program_option = %s, "
-            "year = %s, school_name = %s, password = %s WHERE student_id = %s",
-            (name, email, program_option, year, school_name, password1, student_id)
-        )
+        # Prepare the update statements
+        # Update `Student_Attends`
+        if password1:
+            g.conn.execute(
+                "UPDATE shp2156.Student_Attends SET name = %s, email = %s, program_option = %s, "
+                "year = %s, school_name = %s, password = %s WHERE student_id = %s",
+                (name, email, program_option, year, school_name, password1, student_id)
+            )
+        else:
+            # Update without changing the password
+            g.conn.execute(
+                "UPDATE shp2156.Student_Attends SET name = %s, email = %s, program_option = %s, "
+                "year = %s, school_name = %s WHERE student_id = %s",
+                (name, email, program_option, year, school_name, student_id)
+            )
         
+        # Update `belongs`
         g.conn.execute(
             "UPDATE shp2156.belongs SET div_name = %s, dept_name = %s WHERE student_id = %s",
             (div_name, dept_name, student_id)
         )
 
+        # Redirect to student dashboard with success message
         info_message = "Your information has been updated successfully."
         return redirect(url_for('student_dashboard', info=info_message))
 
