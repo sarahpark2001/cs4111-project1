@@ -39,12 +39,12 @@
             </tr>
         </thead>
         <tbody>
-            {% for dept in depts %}
+            {% for dept in departments %}
             <tr>
                 <td>{{ dept.name }}</td>
                 <td>
                     <ul>
-                        {% for div in depts[dept.name] %}
+                        {% for div in dept_div[dept.name] %}
                         <li>{{ div.name }}</li>
                         {% endfor %}
                     </ul>

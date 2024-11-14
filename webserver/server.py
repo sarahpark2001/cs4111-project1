@@ -1105,7 +1105,7 @@ def all_events():
 
     return render_template('all_events.html', events=events, participants=participants)
 
-@app.route('/school_dept_info_student')
+@app.route('/school_dept_info')
 def school_dept_info():
     if 'user_id' not in session:
         return redirect('/login')
