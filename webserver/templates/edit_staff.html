@@ -26,6 +26,10 @@
             color: green;
             font-weight: bold;
         }
+        .alert-error {
+            color: red;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -50,7 +54,7 @@
             <input type="text" id="job_title" name="job_title" value="{{ staff.job_title }}" required>
 
             <label for="component">Component:</label>
-            <select id="component" name="component" required onchange="updatePayGradeOptions()">
+            <select id="component" name="component" required>
                 <option value="USMC" {% if staff.component == 'USMC' %}selected{% endif %}>USMC</option>
                 <option value="USN" {% if staff.component == 'USN' %}selected{% endif %}>USN</option>
                 <option value="USNR" {% if staff.component == 'USNR' %}selected{% endif %}>USNR</option>
@@ -59,47 +63,20 @@
 
             <label for="pay_grade">Pay Grade:</label>
             <select id="pay_grade" name="pay_grade" required>
-                {% if staff.component == 'Civilian' %}
-                    <option value="Staff" selected>Staff</option>
-                {% else %}
-                    {% set component_ranks = ranks['USN'] if staff.component == 'USNR' else ranks[staff.component] %}
-                    {% for grade, title in component_ranks.items() %}
-                        <option value="{{ grade }}" {% if staff.pay_grade == grade %}selected{% endif %}>{{ title }}</option>
-                    {% endfor %}
-                {% endif %}
+                {% for grade in ranks['USMC'].keys() %}
+                    <option value="{{ grade }}" {% if staff.pay_grade == grade %}selected{% endif %}>{{ grade }}</option>
+                {% endfor %}
             </select>
+
+            <!-- Optional password fields -->
+            <label for="password1">New Password (optional):</label>
+            <input type="password" id="password1" name="password1" placeholder="Enter new password">
+
+            <label for="password2">Confirm New Password:</label>
+            <input type="password" id="password2" name="password2" placeholder="Confirm new password">
 
             <button type="submit">Update Information</button>
         </form>
     </div>
-
-    <script>
-        function updatePayGradeOptions() {
-            const component = document.getElementById("component").value;
-            const payGradeSelect = document.getElementById("pay_grade");
-
-            // Clear existing options
-            payGradeSelect.innerHTML = "";
-
-            if (component === "Civilian") {
-                // Add "Staff" option for Civilian
-                const option = document.createElement("option");
-                option.value = "Staff";
-                option.textContent = "Staff";
-                payGradeSelect.appendChild(option);
-            } else {
-                // Populate pay grades based on component (USN or USMC)
-                const ranks = {{ ranks | tojson }};
-                const selectedRanks = component === "USNR" ? ranks["USN"] : ranks[component];
-
-                for (const grade in selectedRanks) {
-                    const option = document.createElement("option");
-                    option.value = grade;
-                    option.textContent = selectedRanks[grade];
-                    payGradeSelect.appendChild(option);
-                }
-            }
-        }
-    </script>
 </body>
 </html>
