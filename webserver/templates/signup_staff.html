@@ -7,9 +7,6 @@
   <body>
     <form action="/signup_staff" method="post">
       <h2>Sign Up</h2>
-      {% if info %}
-      <div class="alert-info">{{ info | safe }}</div>
-      {% endif %}
       Name (First and Last):<br>
       <input type="text" name="name" required><br>
       Email:<br>
@@ -59,6 +56,9 @@
       
       <input type="submit" value="Sign Up As Staff">
     </form>
+    {% if info %}
+      <div class="alert-info">{{ info | safe }}</div>
+    {% endif %}
   </body>
 </html>
 
