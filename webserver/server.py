@@ -534,7 +534,7 @@ def signup_staff():
         job_title = request.form['job_title']
 
         if name == '' or email == '' or password1 == '' or password2 == '' or phone_number == '' or pay_grade == '' or component == '' or job_title == '':
-            return render_template('signup_staff.html', info="All fields are required.")
+            return redirect(url_for('signup_staff.html', info="All fields are required."))
         
         # Validate name
         if not name or not re.match(r"^[A-Za-z\s'-]{2,50}$", name):
@@ -613,15 +613,15 @@ def create_event():
         points = request.form['points']
 
         if title == '' or location == '' or date == '' or event_start == '' or event_end == '' or max_capacity == '' or points == '':
-            return render_template('create_event.html', info="All fields are required.")
+            return redirect(url_for('create_event.html', info="All fields are required."))
 
         # Check if event date is in the future
         if date < str(datetime.date.today()):
-            return render_template('create_event.html', info="Event date must be in the future.")
+            return redirect(url_for('create_event.html', info="Event date must be in the future."))
         
         # Check if event start is before event end
         if event_start >= event_end:
-            return render_template('create_event.html', info="Event start time must be before event end time.")
+            return redirect(url_for('create_event.html', info="Event start time must be before event end time."))
 
         # Insert new staff record
         try:
@@ -635,7 +635,7 @@ def create_event():
         #     g.conn.execute(q, dict(event_id=event_id, event_start=event_start, event_end=event_end, event_date=date, event_location=location, event_points=points, max_capacity=max_capacity, student_id=student_id, event_title=title))
         except Exception as e:
             print(e)
-            return render_template('create_event.html', info="Error creating event.")
+            return redirect(url_for('create_event.html', info="Error creating event."))
 
         # Redirect to login with info message
         try:
