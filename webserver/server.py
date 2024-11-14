@@ -419,17 +419,6 @@ def signup_student():
         if password1 != password2:
             message = "Passwords do not match."
             return redirect(url_for('signup_student', info=message))
-
-        
-        dept_divisions = {}
-        for division, department in divisions:
-            if department not in dept_divisions:
-                dept_divisions[department] = []
-            dept_divisions[department].append(division)
-
-        if dept_name not in dept_divisions or div_name not in dept_divisions[dept_name]:
-            message = "Invalid division for the selected department."
-            return redirect(url_for('signup_student', info=message))
         
         try:
             cursor = g.conn.execute("SELECT * FROM shp2156.Student_Attends WHERE email = %s", (email,))
