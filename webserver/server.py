@@ -217,7 +217,7 @@ def rsvp():
         FROM shp2156.invites a
         JOIN shp2156.events_created ec ON a.event_id = ec.event_id AND a.event_title = ec.event_title
         LEFT JOIN shp2156.Participates p ON ec.event_id = p.event_id AND ec.event_title = p.event_title
-        WHERE a.div_name = %s
+        WHERE a.div_name = %s AND ec.event_date > CURRENT_DATE
         GROUP BY a.event_id, a.staff_id, ec.student_id, ec.event_id, ec.event_title, ec.event_date, ec.event_start, ec.max_capacity, ec.event_points
         ORDER BY ec.event_date, ec.event_start;
     """
@@ -235,6 +235,7 @@ def rsvp():
         FROM shp2156.approves a
         JOIN shp2156.events_created ec ON a.event_id = ec.event_id
         LEFT JOIN shp2156.Participates p ON ec.event_id = p.event_id 
+        WHERE ec.event_date > CURRENT_DATE
         GROUP BY a.event_id, a.staff_id, ec.student_id, ec.event_id, ec.event_title, ec.event_date, ec.event_start, ec.max_capacity, ec.event_points
         ORDER BY ec.event_date, ec.event_start;
     """
