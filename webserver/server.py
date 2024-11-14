@@ -123,6 +123,10 @@ def manage_student_action():
     action = request.form.get('action')
     confirm = request.form.get('confirm')
 
+    # Ensure student_id is provided and valid
+    if not student_id:
+        return redirect(url_for('staff_dashboard', info="No student ID provided for the action."))
+
     if action == 'modify':
         # Redirect to modify student information
         return redirect(url_for('manage_student_modify', student_id=student_id))
@@ -133,7 +137,7 @@ def manage_student_action():
             "SELECT name FROM shp2156.Student_Attends WHERE student_id = %s", (student_id,)
         ).fetchone()
         if not student:
-            return "Student not found", 404
+            return redirect(url_for('staff_dashboard', info="Student not found."))
         return render_template('manage_student_confirm.html', student=student, student_id=student_id, action='delete')
 
     elif action == 'confirm_delete' and confirm == 'yes':
@@ -151,6 +155,7 @@ def manage_student_action():
         return redirect(url_for('staff_dashboard', info="Deletion canceled."))
 
     return redirect(url_for('staff_dashboard'))
+
 
 
 @app.route('/directory')
