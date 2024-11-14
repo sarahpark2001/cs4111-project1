@@ -158,23 +158,6 @@ def manage_student_action():
 
     return redirect(url_for('staff_dashboard'))
 
-    elif action == 'confirm_delete' and confirm == 'yes':
-        # Confirm and proceed with deletion
-        try:
-            g.conn.execute("DELETE FROM shp2156.Student_Attends WHERE student_id = %s", (student_id,))
-            g.conn.execute("DELETE FROM shp2156.belongs WHERE student_id = %s", (student_id,))
-            return redirect(url_for('staff_dashboard', info=f"Student ID {student_id} has been deleted successfully."))
-        except Exception as e:
-            print("Error deleting student:", e)
-            return redirect(url_for('staff_dashboard', info="An error occurred while trying to delete the student."))
-
-    elif action == 'confirm_delete' and confirm == 'no':
-        # Cancel the deletion and return to staff dashboard
-        return redirect(url_for('staff_dashboard', info="Deletion canceled."))
-
-    return redirect(url_for('staff_dashboard'))
-
-
 
 @app.route('/directory')
 def directory():
