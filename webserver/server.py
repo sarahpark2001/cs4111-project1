@@ -248,12 +248,18 @@ def edit_staff():
 
 @app.route('/edit_student', methods=['GET', 'POST'])
 def edit_student():
-    if 'user_id' not in session or session.get('user_type') != 'student':
+    if 'user_id' not in session:
         return redirect('/login')
+    
+    # Determine the student_id to edit; if none is provided, default to the logged-in student's ID
+    student_id = request.args.get('student_id') or session['user_id']
+    user_type = session.get('user_type')
 
-    student_id = session['user_id']
+    # Ensure that only staff can edit other students' profiles
+    if user_type != 'staff' and student_id != session['user_id']:
+        return redirect('/login')  # Only staff can edit other users
 
-    # Fetch school, department, and division data needed for both GET and POST requests
+    # Fetch school, department, and division data for form
     cursor = g.conn.execute("SELECT school_name FROM schools")
     schools = cursor.fetchall()
 
@@ -277,6 +283,9 @@ def edit_student():
             "ON sa.student_id = b.student_id WHERE sa.student_id = %s",
             (student_id,)
         ).fetchone()
+
+        if not student:
+            return "Student not found", 404
 
         return render_template('edit_student.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions)
 
@@ -337,13 +346,18 @@ def edit_student():
                 (div_name, dept_name, student_id)
             )
 
-            # Redirect to student dashboard with success message
-            info_message = "Your information has been updated successfully."
-            return redirect(url_for('student_dashboard', info=info_message))
+            # Redirect based on user type
+            if user_type == 'staff':
+                info_message = f"Student information for {name} (ID: {student_id}) has been updated successfully."
+                return redirect(url_for('staff_dashboard', info=info_message))
+            else:
+                info_message = "Your information has been updated successfully."
+                return redirect(url_for('student_dashboard', info=info_message))
         
         except Exception as e:
             print("Error updating student information:", e)
-            return render_template('edit_student.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions, info="An error occurred while updating your information.")
+            return render_template('edit_student.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions, info="An error occurred while updating the information.")
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
