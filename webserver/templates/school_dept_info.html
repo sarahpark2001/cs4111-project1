@@ -23,7 +23,7 @@
         <tbody>
             {% for school in schools %}
             <tr>
-                <td>{{ school.name }}</td>
+                <td>{{ school.school_name }}</td>
                 <td>{{ school.address }}</td>
             </tr>
             {% endfor %}
@@ -41,11 +41,11 @@
         <tbody>
             {% for dept in departments %}
             <tr>
-                <td>{{ dept.name }}</td>
+                <td>{{ dept.dept_name }}</td>
                 <td>
                     <ul>
                         {% for div in dept_div[dept.name] %}
-                        <li>{{ div.name }}</li>
+                        <li>{{ div.div_name }}</li>
                         {% endfor %}
                     </ul>
                 </td>
