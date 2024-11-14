@@ -135,6 +135,9 @@ def login():
         user_id = request.form['userid']
         password = request.form['password']
         user_type = request.form['user_type']  
+
+        if user_type not in ['student', 'staff'] or not user_id or not password:
+            return render_template('login.html', info='Please enter valid credentials.')
         
         if user_type == 'student':
             # cursor = g.conn.execute(
@@ -395,6 +398,9 @@ def signup_student():
         program_option = request.form['program_option']
         year = request.form['year']
 
+        if name == '' or email == '' or password1 == '' or password2 == '' or school_name == '' or dept_name == '' or div_name == '' or program_option == '' or year == '':
+            return render_template('signup_student.html', info="All fields are required.")
+
         # Validate name
         if not name or not re.match(r"^[A-Za-z\s'-]{2,50}$", name):
             message = "Name must be 2-50 characters and contain only letters, spaces, apostrophes, or hyphens."
@@ -515,6 +521,9 @@ def signup_staff():
         component = request.form['component']
         job_title = request.form['job_title']
 
+        if name == '' or email == '' or password1 == '' or password2 == '' or phone_number == '' or pay_grade == '' or component == '' or job_title == '':
+            return render_template('signup_staff.html', info="All fields are required.")
+
         # Check if passwords match
         if password1 != password2:
             return redirect(url_for('signup_staff', info="Passwords do not match."))
@@ -577,6 +586,9 @@ def create_event():
         event_end = request.form['event_end']
         max_capacity = request.form['max_capacity']
         points = request.form['points']
+
+        if title == '' or location == '' or date == '' or event_start == '' or event_end == '' or max_capacity == '' or points == '':
+            return render_template('create_event.html', info="All fields are required.")
 
         # Insert new staff record
         # g.conn.execute(
