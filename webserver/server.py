@@ -127,6 +127,80 @@ def directory_staff():
 
     return render_template('directory_staff.html', staff_data=staff, student_data=student)
 
+@app.route('/edit_staff', methods=['GET', 'POST'])
+def edit_staff():
+    if 'user_id' not in session or session.get('user_type') != 'staff':
+        return redirect('/login')
+
+    staff_id = session['user_id']
+
+    # Fetch existing staff data
+    staff = g.conn.execute(
+        "SELECT name, email, phone_number, pay_grade, component, job_title FROM shp2156.Staffs WHERE staff_id = %s",
+        (staff_id,)
+    ).fetchone()
+
+    # If GET, render form with existing data
+    if request.method == 'GET':
+        return render_template('edit_staff.html', staff=staff)
+
+    # If POST, process the form submission
+    name = request.form.get('name', staff['name'])
+    email = request.form.get('email', staff['email'])
+    password1 = request.form.get('password1', None)
+    password2 = request.form.get('password2', None)
+    phone_number = request.form.get('phone_number', staff['phone_number'])
+    pay_grade = request.form.get('pay_grade', staff['pay_grade'])
+    component = request.form.get('component', staff['component'])
+    job_title = request.form.get('job_title', staff['job_title'])
+
+    # Validate name
+    if name and not re.match(r"^[A-Za-z\s'-]{2,50}$", name):
+        return redirect(url_for('edit_staff', info="Name must be 2-50 characters and contain only letters, spaces, apostrophes, or hyphens."))
+
+    # Validate email
+    email_regex = r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)"
+    if email and not re.match(email_regex, email):
+        return redirect(url_for('edit_staff', info="Please enter a valid email address."))
+
+    # Validate phone number format ###-###-####
+    phone_regex = r"^\d{3}-\d{3}-\d{4}$"
+    if phone_number and not re.match(phone_regex, phone_number):
+        return redirect(url_for('edit_staff', info="Phone number must be in the format ###-###-####."))
+
+    # Check if passwords match if entered
+    if password1 or password2:
+        if password1 != password2:
+            return redirect(url_for('edit_staff', info="Passwords do not match."))
+
+    # Update only changed fields
+    update_data = {
+        "name": name,
+        "email": email,
+        "phone_number": phone_number,
+        "pay_grade": pay_grade,
+        "component": component,
+        "job_title": job_title
+    }
+
+    if password1:
+        update_data["password"] = password1
+
+    update_query = """
+        UPDATE shp2156.Staffs
+        SET name = %(name)s, email = %(email)s, phone_number = %(phone_number)s,
+            pay_grade = %(pay_grade)s, component = %(component)s, job_title = %(job_title)s
+    """
+    if password1:
+        update_query += ", password = %(password)s"
+    update_query += " WHERE staff_id = %s"
+
+    g.conn.execute(update_query, {**update_data, "staff_id": staff_id})
+
+    info_message = "Your information has been updated successfully."
+    return redirect(url_for('staff_dashboard', info=info_message))
+
+
 @app.route('/edit_student', methods=['GET', 'POST'])
 def edit_student():
     if 'user_id' not in session or session.get('user_type') != 'student':
