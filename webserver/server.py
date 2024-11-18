@@ -359,9 +359,9 @@ def manage_student_modify():
         ).fetchone()
 
         if duplicate_email:
-            message= "Email already exists."
-            return redirect(url_for('edit_student', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions, info=message))
-            # return render_template('edit_student.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions, info="This email is already in use by another student.")
+            # message= "Email already exists."
+            # return redirect(url_for('edit_student', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions, info=message))
+            return render_template('edit_student.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions, info="This email is already in use by another student.")
 
     if password1 != password2:
         # message="Passwords do not match."
@@ -392,8 +392,8 @@ def manage_student_modify():
     except Exception as e:
         print("Error updating student information:", e)
         message = "An error occurred while updating the student's information."
-        return redirect(url_for('edit_student', info=message))
-        # return render_template('edit_student.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions, info="An error occurred while updating the student's information.")
+        # return redirect(url_for('edit_student', info=message))
+        return render_template('edit_student.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions, info="An error occurred while updating the student's information.")
 
 
 @app.route('/edit_student', methods=['GET', 'POST'])
