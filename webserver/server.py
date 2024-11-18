@@ -142,7 +142,8 @@ def manage_student():
             return render_template('manage_student_confirm.html', student=student)
         else:
             # If no student is found, display an error message
-            return render_template('manage_student.html', info="No student found with that ID.")
+            message="No student found with that ID."
+            return render_template('manage_student.html', info=message)
 
     return render_template('manage_student.html')
 
@@ -242,24 +243,24 @@ def edit_staff():
         # Validation: Ensure name is provided and valid
         if not name or not re.match(r"^[A-Za-z\s'-]{2,50}$", name):
             message = "Name must be 2-50 characters and contain only letters, spaces, apostrophes, or hyphens."
-            return render_template('edit_staff.html', staff=staff, info=message)
+            return redirect(url_for('edit_staff', info=message))
 
         # Validate email
         email_regex = r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)"
         if not email or not re.match(email_regex, email):
             message = "Please enter a valid email address."
-            return render_template('edit_staff.html', staff=staff, info=message)
+            return redirect(url_for('edit_staff', info=message))
         
         # Validate phone number.
         phone_regex = r"^\d{3}-\d{3}-\d{4}$"
         if not re.match(phone_regex, phone_number):
             message = "Phone number must be in the format ###-###-####."
-            return render_template('edit_staff.html', staff=staff, info=message)
+            return redirect(url_for('edit_staff', info=message))
 
         # Validation: Ensure passwords match if provided
         if password1 and password1 != password2:
             info_message = "Passwords do not match."
-            return render_template('edit_staff.html', staff=staff, info=info_message)
+            return redirect(url_for('edit_staff', info=info_message))
 
         # Construct SQL query based on whether the password needs to be updated
         if password1:  # If a new password is provided
@@ -287,7 +288,9 @@ def edit_staff():
         
         except Exception as e:
             print("Error updating staff information:", e)
-            return render_template('edit_staff.html', staff=staff, info="An error occurred while updating your information.")
+            info_message = "An error occurred while updating your information."
+            return redirect(url_for('edit_staff', info=info_message))
+            # return render_template('edit_staff.html', staff=staff, info="An error occurred while updating your information.")
 
 
 @app.route('/manage_student_modify', methods=['GET', 'POST'])
@@ -356,9 +359,13 @@ def manage_student_modify():
         ).fetchone()
 
         if duplicate_email:
-            return render_template('edit_student.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions, info="This email is already in use by another student.")
+            message= "Email already exists."
+            return redirect(url_for('edit_student', info=message))
+            # return render_template('edit_student.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions, info="This email is already in use by another student.")
 
     if password1 != password2:
+        message="Passwords do not match."
+        return redirect(url_for('edit_student', info=message))
         return render_template('edit_student.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions, info="Passwords do not match.")
 
     try:
@@ -384,7 +391,9 @@ def manage_student_modify():
 
     except Exception as e:
         print("Error updating student information:", e)
-        return render_template('edit_student.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions, info="An error occurred while updating the student's information.")
+        message = "An error occurred while updating the student's information."
+        return redirect(url_for('edit_student', info=message))
+        # return render_template('edit_student.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions, info="An error occurred while updating the student's information.")
 
 
 @app.route('/edit_student', methods=['GET', 'POST'])
@@ -466,11 +475,14 @@ def edit_student():
             ).fetchone()
 
             if duplicate_email:
-                return render_template('edit_student.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions, info="This email is already in use by another student.")
+                message = "Email already exists."
+                return redirect(url_for('edit_student', info=message))
 
         if password1 != password2:
-            return render_template('edit_student.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions, info="Passwords do not match.")
-    
+            message = "Passwords do not match."
+            return redirect(url_for('edit_student', info=message))
+        
+
         try:
             # Update student data
             if password1:
@@ -494,7 +506,8 @@ def edit_student():
 
         except Exception as e:
             print("Error updating student information:", e)
-            return render_template('edit_student.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions, info="An error occurred while updating your information.")
+            message="An error occurred while updating your information."
+            return redirect(url_for('edit_student', info=message))
 
 
 @app.route('/login', methods=['GET', 'POST'])
