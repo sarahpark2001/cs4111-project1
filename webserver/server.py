@@ -600,6 +600,20 @@ def rsvp():
         event_date = div_event['event_date']
         invitation_messages.append(f"You are invited to RSVP for '{event_title}' on {event_date}!")
 
+    rsvp_query="""
+        SELECT ec.event_title, ec.event_date 
+        FROM shp2156.Participates p
+        JOIN shp2156.events_created ec ON p.event_id = ec.event_id
+        WHERE p.student_id2 = %s
+    """
+    rsvp_result = g.conn.execute(rsvp_query, (student_id,)).fetchall()
+
+    rsv_messages = []
+    for rsvp in rsvp_result:
+        event_title = rsvp['event_title']
+        event_date = rsvp['event_date']
+        rsv_messages.append(f"You have already RSVPed for '{event_title}' on {event_date}.")
+
     events_query = """
         SELECT a.event_id, a.staff_id, ec.student_id, ec.event_title, ec.event_date, ec.event_start, ec.max_capacity, ec.event_points, (ec.max_capacity - COUNT(DISTINCT p.student_id2)) AS spots_remaining
         FROM shp2156.approves a
@@ -689,7 +703,7 @@ def rsvp():
 
         return redirect(url_for('student_dashboard', info=message))
 
-    return render_template('rsvp.html', events=events, invitation_messages=invitation_messages)
+    return render_template('rsvp.html', events=events, invitation_messages=invitation_messages, rsvp_messages=rsv_messages, division_events=division_events)
 
 
 @app.route('/student_dashboard')

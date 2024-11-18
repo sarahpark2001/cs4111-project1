@@ -22,6 +22,11 @@
         <p>{{ msg }}</p>
         {% endfor %}
     </div>
+    <div>
+        {% for msg in rsvp_messages %}
+        <p>{{ msg }}</p>
+        {% endfor %}
+    </div>
     <form method="POST" action="/rsvp">
         <table>
             <thead>
