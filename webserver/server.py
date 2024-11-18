@@ -360,7 +360,7 @@ def manage_student_modify():
 
         if duplicate_email:
             message= "Email already exists."
-            return redirect(url_for('edit_student', info=message))
+            return redirect(url_for('edit_student', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions, info=message))
             # return render_template('edit_student.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions, info="This email is already in use by another student.")
 
     if password1 != password2:
