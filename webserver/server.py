@@ -366,7 +366,7 @@ def manage_student_modify():
     if password1 != password2:
         # message="Passwords do not match."
         # return redirect(url_for('edit_student', info=message))
-        return redirect(url_for('edit_student.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions, info="Passwords do not match."))
+        return redirect(url_for('edit_student', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions, info="Passwords do not match."))
 
     try:
         # Update `Student_Attends`
