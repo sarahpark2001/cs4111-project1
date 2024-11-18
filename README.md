@@ -9,8 +9,8 @@ This repository contains a sample web server setup for managing event planning i
 ## Description
 Our web server enables event planning interactions for the NYC NROTC group. Users can sign up or sign in as students or staff and are directed to the appropriate dashboard. 
 
-- **Students**: View the student/staff directory, create events, invite others to events, RSVP for future events, and log out.
-- **Staff**: View the student/staff directory, approve pending events, view all approved events, and log out.
+- **Students**: View the student/staff directory, view the schools/divisions/departments directory, create events, invite others to events, RSVP for future events, can modify their own information, and log out.
+- **Staff**: View the student/staff directory, view the schools/divisions/departments directory, can modify their own information, can modify other students' information, approve pending events, view all approved events, and log out.
 
 ## Directory Structure
 - **templates/** - HTML templates used for rendering pages.
