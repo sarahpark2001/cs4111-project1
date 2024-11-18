@@ -22,19 +22,19 @@ Our web server enables event planning interactions for the NYC NROTC group. User
 - **/signup** - Redirects to signup pages for students or staff based on form submission from `/login` page.
 - **/signup_student** - Form to add new student to Student_Attends table as well as add them to the appropriate division & department in the `belongs` table.
 - **/signup_staff** - Form to add new staff to Staffs table.
-- **/student_dashboard** - Dashboard for students to see the directory, view events, RSVP, edit their info, track points and logout.
-- **/staff_dashboard** - Dashboard for staff to see the directory, view all events, approve/reject pending events, edit their own info, manage students' info, and logout. 
+- **/student_dashboard** - Dashboard for students to see the directories, view events, RSVP, edit their info, track points and logout.
+- **/staff_dashboard** - Dashboard for staff to see the directories, view all events, approve/reject pending events, edit their own info, manage students' info, and logout. 
 - **/create_event** - Enables students to create new events (pending approval by staff).
 - **/view_events** - Staff page for approving/rejecting student-created events.
 - **/invite** - Students who have created an event can send invitations once event has been approved.
 - **/all_events** - Staff can view history of all approved events, including participants.
-- **/rsvp** - Students can view invitations to approved events and sign up for all other approved events.
+- **/rsvp** - Students can view invitations to approved events, see their RSVPed events, and sign up for all other approved events.
 - **/edit_student** - Students can edit the data attached to their student_id in the `student_attends` and `belongs` tables.
 - **/edit_staff** - Staff can edit the data attached to their staff_id in the `staffs` table.
 - **/manage_student** - Staff can look up a student by student_id to manage that student's record, with options to modify or delete the student.
 - **/manage_student_action** - Handles the action selected in `/manage_student` (either modify or delete), and routes the user accordingly.
 - **/manage_student_modify** - Allows staff to modify student information, similar to `/edit_student` but with administrative permissions.
-- **/confirm_delete_student** - Separate page for staff to confirm deletion of a student after choosing the delete option, displaying a final confirmation prompt for the action.
+- **/confirm_delete_student** - Separate page for staff to confirm deletion of a student after choosing the delete option, displaying a final confirmation prompt for the action. If deleting the student causes conflicts to the database, it will prevent staff from deleting student. 
 - **/school_dept_info** - A directory of schools, departments, and divisions for students and staff to view.
 
 
@@ -46,7 +46,7 @@ To support this feature, we modified the foreign key constraint on the `Belongs`
 
 We also implemented edit features for both students and staff, allowing users to modify their own information. This self-edit capability enables users to keep their profiles up-to-date while adhering to the app's permissions structure.
 
-Additionally, we added an `event_title` attribute (text) to the `Events_Created`, `Participates`, `Approves`, and `Invites` tables, incorporating it into the keys of these tables. While the unique `event_id` is sufficient for database management, `event_title` provides more contextual information for students and staff when deciding on event approvals and attendance, improving the user experience in the web app.
+Additionally, we added an `event_title` attribute (text) to the `Events_Created`, `Participates`, `Approves`, and `Invites` tables, incorporating it into the keys of these tables. While the unique `event_id` is sufficient for database management, `event_title` provides more contextual information for students and staff when deciding on event approvals and attendance, improving the user experience in the web app.  
 
 Beyond these schema changes, we expanded our implementation with many other new details. For instance, a new student’s default `total_points` is set to 0 upon signup. We added functionality to auto-assign `staff_id` and `student_id` as one higher than the current highest value to ensure uniqueness. To maintain data integrity, we implemented regex checks for names, phone numbers, and emails to prevent junk data from being stored. 
 
