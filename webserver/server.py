@@ -364,9 +364,9 @@ def manage_student_modify():
             # return render_template('edit_student.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions, info="This email is already in use by another student.")
 
     if password1 != password2:
-        message="Passwords do not match."
-        return redirect(url_for('edit_student', info=message))
-        return render_template('edit_student.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions, info="Passwords do not match.")
+        # message="Passwords do not match."
+        # return redirect(url_for('edit_student', info=message))
+        return redirect(url_for('edit_student.html', student=student, schools=schools, departments=departments, dept_divisions=dept_divisions, info="Passwords do not match."))
 
     try:
         # Update `Student_Attends`
